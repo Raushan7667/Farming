@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Heart, Share2, ShoppingCart, Truck, RefreshCw, Star } from 'lucide-react';
+import { Heart, Share2, ShoppingCart, Truck, RefreshCw, Star, Minus, Plus } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
@@ -8,6 +8,18 @@ const SingleItem = () => {
     const [product, setProduct] = useState(null);
     const [mainImage, setMainImage] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
+    const [quantity, setQuantity] = useState(1);
+
+    let token;
+    const storedTokenData = JSON.parse(localStorage.getItem("token"));
+    if (storedTokenData && Date.now() < storedTokenData.expires) {
+        console.log("Token:", storedTokenData.value);
+        token = storedTokenData.value
+    } else {
+        localStorage.removeItem("token");
+        console.log("Token has expired");
+    }
+
 
     const fetchProduct = async () => {
         try {
@@ -30,18 +42,89 @@ const SingleItem = () => {
         }
     }, [product]);
 
-    const addtoWishList=async(id)=>{
-        try {
-            let response=await axios.post("http://localhost:4000/api/v1/products/addwishlist",{
-                productId:id 
-            })
-            
-        } catch (error) {
-            
+    const addtoWishList = async (productId) => {
+
+        if (token) {
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    // Do not set 'Content-Type' manually for FormData
+                },
+            };
+
+            console.log("Add to wish list token", token)
+
+
+            try {
+
+
+                let response = await axios.post("http://localhost:4000/api/v1/products/addwishlist", {
+                    productId
+                }, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}` // Ensure token is valid
+                    }
+
+                }
+
+                )
+
+                console.log("wisList Response:", response.data);
+                alert("Product added to WishList successfully!");
+            } catch (error) {
+                console.error("Error adding to wishList:", error.response?.data || error.message);
+                alert("Failed to add product to WishList.");
+            }
         }
 
 
     }
+
+    const addtocart = async (id) => {
+        if (!selectedSize) {
+            alert("Please select a size before adding to cart.");
+            return;
+        }
+
+        let selectedsize = selectedSize.size;
+        let selecetedDiscountedPrice = selectedSize.discountedPrice;
+        let selectedPrice = selectedSize.price;
+
+        try {
+            const response = await axios.post(
+                "http://localhost:4000/api/v1/products/addtocart",
+                {
+                    productId: id,
+                    quantity,
+                    selectedsize, // Correct key name
+                    selecetedDiscountedPrice, // Fix typo if needed
+                    selectedPrice
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}` // Ensure token is valid
+                    }
+                }
+            );
+
+            console.log("Cart Response:", response.data);
+            alert("Product added to cart successfully!");
+        } catch (error) {
+            console.error("Error adding to cart:", error.response?.data || error.message);
+            alert("Failed to add product to cart.");
+        }
+
+        console.log("Add to Cart:", selectedsize, selectedPrice, selecetedDiscountedPrice, quantity);
+    };
+
+
+    const handleQuantityChange = (newQuantity) => {
+        if (selectedSize && newQuantity >= 1 && newQuantity <= selectedSize.quantity) {
+            setQuantity(newQuantity);
+        }
+    };
 
     if (!product) return <div className="text-center text-xl mt-20">Loading...</div>;
 
@@ -59,7 +142,7 @@ const SingleItem = () => {
                             className={`w-16 h-16 lg:w-20 lg:h-20 object-cover rounded-lg cursor-pointer  
                                 ${mainImage === image ? 'border-2 border-blue-500' : 'opacity-70 hover:opacity-100'}`}
                             onClick={() => setMainImage(image)}
-                            
+
                         />
                     ))}
                 </div>
@@ -73,10 +156,10 @@ const SingleItem = () => {
                     />
                     <div className="absolute top-4 right-4 flex space-x-2">
                         <button className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition" aria-label="Add to Wishlist">
-                            <Heart size={24} className="text-gray-600 hover:text-red-500" 
-                           onClick={()=>{
-                            addtoWishList(productId)
-                           }}
+                            <Heart size={24} className="text-gray-600 hover:text-red-500"
+                                onClick={() => {
+                                    addtoWishList(product._id)
+                                }}
                             />
                         </button>
                         <button className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition" aria-label="Share">
@@ -107,19 +190,54 @@ const SingleItem = () => {
                                 </div>
                             ))}
                         </div>
+
                     </div>
 
+
+
                     {/* Action Buttons */}
-                    <div className="flex space-x-4 mt-4">
-                        <button className="flex-1 flex items-center justify-center bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition">
-                            <ShoppingCart className="mr-2" /> Add to Cart
-                        </button>
-                        <button className="flex-1 flex items-center justify-center bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
-                            Buy Now
-                        </button>
+
+
+                    <div>
+                        <div className="flex  space-x-4  p-4 rounded-lg mb-4">
+                            <span className="text-gray-700 font-medium">Quantity:</span>
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={() => handleQuantityChange(quantity - 1)}
+                                    disabled={quantity <= 1}
+                                    className={`p-2 rounded-full ${quantity <= 1
+                                        ? 'bg-gray-100 text-gray-400'
+                                        : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                                        } transition-colors duration-200`}
+                                >
+                                    <Minus size={16} />
+                                </button>
+                                <span className="w-10 text-center font-medium">{quantity}</span>
+                                <button
+                                    onClick={() => handleQuantityChange(quantity + 1)}
+                                    disabled={!selectedSize || quantity >= selectedSize.quantity}
+                                    className={`p-2 rounded-full ${!selectedSize || quantity >= selectedSize.quantity
+                                        ? 'bg-gray-100 text-gray-400'
+                                        : 'bg-blue-100 text-green-600 hover:bg-green-200'
+                                        } transition-colors duration-200`}
+                                >
+                                    <Plus size={16} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex space-x-4 mt-4">
+                            <button className="flex-1 flex items-center justify-center bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition" onClick={() => addtocart(product._id)}>
+                                <ShoppingCart className="mr-2" /> Add to Cart
+                            </button>
+                            <button className="flex-1 flex items-center justify-center bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+                                Buy Now
+                            </button>
+                        </div>
                     </div>
                 </div>
+
             </div>
+
 
             {/* Product Details */}
             <div>
