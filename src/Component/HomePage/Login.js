@@ -20,9 +20,24 @@ const Login = () => {
         email: formData.email,
         password: formData.password
       })
-      localStorage.setItem("token",response.data.token)
-      const token = localStorage.getItem("token")
-      console.log("token is",token)
+      // localStorage.setItem("token",response.data.token)
+      // const token = localStorage.getItem("token")
+      // console.log("token is",token)
+
+      const tokenData = {
+        value: response.data.token,
+        expires: Date.now() + 86400000, // 24 hours from now
+      };
+      
+      localStorage.setItem("token", JSON.stringify(tokenData));
+      
+      const storedTokenData = JSON.parse(localStorage.getItem("token"));
+      if (storedTokenData && Date.now() < storedTokenData.expires) {
+        console.log("Token:", storedTokenData.value);
+      } else {
+        localStorage.removeItem("token");
+        console.log("Token has expired");
+      }
       console.log("resp during login",response)
       navigate('/')
       if(response?.status){
