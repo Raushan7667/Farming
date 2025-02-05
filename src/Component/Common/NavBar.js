@@ -7,13 +7,21 @@ const NavBar = () => {
 
   const [mobileMenu, setMobileMenu] = useState(false);
   const [userImage, setUserImage] = useState({});
-  const[userRole, setUserRole] = useState("")
+  const [userRole, setUserRole] = useState("")
   // localStorage.removeItem('token')
-  const token = localStorage?.getItem('token');
-  const navigate=useNavigate()
- 
+  let token;
+  const storedTokenData = JSON.parse(localStorage.getItem("token"));
+  if (storedTokenData && Date.now() < storedTokenData.expires) {
+    console.log("Token:", storedTokenData.value);
+    token = storedTokenData.value
+  } else {
+    localStorage.removeItem("token");
+    console.log("Token has expired");
+  }
+  const navigate = useNavigate()
+
   console.log("token is in navbar", token)
- 
+
 
   const config = {
     headers: {
@@ -251,15 +259,15 @@ const NavBar = () => {
                 <span>Notification</span>
               </div>
               {
-                userRole==="Seller"&&
-              
-              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={()=>{
-               navigate("/seller")
-              }}>
-                <Store className="w-5 h-5" />
-                <span>Sell Now</span>
-              </div>
-            }
+                userRole === "Seller" &&
+
+                <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={() => {
+                  navigate("/seller")
+                }}>
+                  <Store className="w-5 h-5" />
+                  <span>Sell Now</span>
+                </div>
+              }
             </div>
           </div>
         </div>
