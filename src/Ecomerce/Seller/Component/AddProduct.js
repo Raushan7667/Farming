@@ -117,7 +117,15 @@ const AddProduct = () => {
     });
   
     // Get the token from localStorage
-    const token = localStorage.getItem('token');
+  let token;
+  const storedTokenData = JSON.parse(localStorage.getItem("token"));
+  if (storedTokenData && Date.now() < storedTokenData.expires) {
+    console.log("Token:", storedTokenData.value);
+    token=storedTokenData.value
+  } else {
+    localStorage.removeItem("token");
+    console.log("Token has expired");
+  }
     if (token) {
       const config = {
         headers: {
