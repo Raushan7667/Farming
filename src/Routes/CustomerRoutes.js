@@ -14,6 +14,8 @@ import Login from '../Component/HomePage/Login'
 import ForgetPassword from '../Component/HomePage/ForgetPassword'
 import Footer from '../Component/Common/Footer'
 import SingleItem from '../Ecomerce/Product/SingleItem'
+import Cart from '../Ecomerce/Cart/Cart'
+import Profile from '../Ecomerce/Profile/Profile'
 
 const CustomerRoutes = () => {
   return (
@@ -31,7 +33,8 @@ const CustomerRoutes = () => {
         <Route path='/verifyemail' element={<VerifyEmail />} />
         <Route path="/product/:id" element={<ProductPage />} />
         <Route path='/product/item/:productId' element={<SingleItem/>} />
-
+        <Route path='/product/cart' element={<Cart/>} />
+        <Route path='/product/profile' element={<Profile/>} />    
       </Routes>
       <Footer/>
     </>
