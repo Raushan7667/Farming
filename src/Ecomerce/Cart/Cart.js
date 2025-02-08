@@ -1,9 +1,12 @@
 import axios from 'axios'
+import { Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
     const [cartProduct, setCartProduct] = useState(null)
     const [token, setToken] = useState(null);
+    const navigate=useNavigate()
 
     const fetcProduct = async () => {
         try {
@@ -53,65 +56,100 @@ const Cart = () => {
             console.error("Error removing item:", error);
         }
     };
+
+    const goToProduct=async(id)=>{
+        navigate(`/product/item/${id}`)
+    }
+
+    if (!cartProduct?.items?.length) {
+        return (
+          <div className="flex items-center justify-center h-64">
+            <p className="text-gray-500 text-lg">Your cart is empty</p>
+          </div>
+        );
+      }
     
 
 
     return (
         <>
-            <div className="mx-auto p-4 mt-16 flex justify-between lg:flex-row flex-col">
-                <div>
-                    {cartProduct?.items?.map(item => (
-
-                        <div
-                            key={item._id}
-                            className="flex gap-4 items-center border-b py-4"
-                        >
-                            <div>
-                                <img
-                                    src={item?.product?.images[0] || "https://via.placeholder.com/120"} // Replace with actual image URL
-                                    alt={item.product.name}
-                                    className="w-28 h-28 object-cover rounded-md"
-                                />
-                            </div>
-                            <div>
-                                <h3 className="font-semibold">{item.product.name}</h3>
-                                <p className="text-gray-600">Size: {item.selectedsize}</p>
-                                <p className="text-gray-600">Shop: {item.product.fullShopDetails}</p>
-                                <p className="text-gray-600">Qunatitiy:-{item.quantity}</p>
-                            </div>
-
-                            <div className="flex items-center space-x-4">
-                                <div>
-                                    <p className="line-through text-gray-500">₹{item.selectedPrice}</p>
-                                    <p className="font-bold text-green-600">₹{item.selecetedDiscountedPrice}</p>
-                                </div>
-
-                                <button
-                                      onClick={() => removeItem(item._id)}
-                                    className="text-red-500 hover:text-red-700"
-                                >
-                                    Remove
-                                </button>
-                            </div>
+      <div className="container mx-auto px-4 mt-16">
+      <div className="flex flex-col lg:flex-row gap-6 min-h-[calc(100vh-8rem)]">
+        {/* Cart Items Section */}
+        <div className="lg:w-3/5 w-full">
+          <div className="bg-gray-50 rounded-lg shadow p-6 max-h-[calc(100vh-8rem)] overflow-auto scrollbar-hide">
+            <h2 className="text-xl font-semibold mb-4">Shopping Cart</h2>
+            <div className="space-y-4">
+              {cartProduct?.items?.map((item) => (
+                <div
+                  key={item._id}
+                  className="bg-white rounded-lg p-4 shadow-sm"
+                >
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <img
+                      src={item?.product?.images[0] || "/api/placeholder/112/112"}
+                      alt={item.product.name}
+                      className="w-28 h-28 object-cover rounded-md flex-shrink-0"
+                    />
+                    <div className="flex-grow">
+                      <h3 className="font-semibold text-lg cursor-pointer hover:text-blue-600" onClick={()=>{goToProduct(item.product._id)}}>{item.product.name}</h3>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <p>Size: {item.selectedsize}</p>
+                        <p>Shop: {item.product.fullShopDetails}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="font-medium">Price:</span>
+                          <span className="line-through text-gray-500">₹{item.selectedPrice}</span>
+                          <span className="text-green-600 font-semibold">₹{item.selecetedDiscountedPrice}</span>
                         </div>
-                    ))}
-                </div>
-                <div className="mt-6 border-t pt-4">
-                    <div className="flex justify-between">
-                        <span>Total Price:</span>
-                        <span className="line-through">₹{cartProduct?.totalPrice}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between font-bold">
-                        <span>Total Discounted Price:</span>
-                        <span className="text-green-600">₹{cartProduct?.totalDiscountedPrice}</span>
-                    </div>
-                    <button className="mt-4 w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600">
-                        Proceed to Checkout
+                  </div>
+                  <div className="flex items-center justify-between mt-4 pt-2 border-t">
+                    <p className="text-gray-600">
+                      Quantity: <span className="font-semibold">{item.quantity}</span>
+                    </p>
+                    <button
+                      onClick={() => removeItem(item._id)}
+                      className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                      <span>Remove</span>
                     </button>
+                  </div>
                 </div>
-
-
+              ))}
             </div>
+          </div>
+        </div>
+
+        {/* Order Summary Section - Fixed */}
+        <div className="lg:w-2/5 w-full">
+          <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Total Price</span>
+                <span className="line-through text-gray-500">₹{cartProduct?.totalPrice}</span>
+              </div>
+              <div className="flex justify-between items-center font-semibold">
+                <span>Total Discounted Price</span>
+                <span className="text-green-600">₹{cartProduct?.totalDiscountedPrice}</span>
+              </div>
+              <div className=" text-green-500 mt-2 font-semibold ">
+                You save: ₹{cartProduct?.totalPrice - cartProduct?.totalDiscountedPrice}
+              </div>
+            </div>
+            <button className="w-full mt-6 bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium">
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+        technological and economic changes, advances in space exploration are expanding humanity’s reach beyond Earth. Space agencies like NASA, ESA, and private companies like SpaceX and Blue Origin are working towards ambitious goals such as colonizing Mars, mining asteroids for resources, and establishing permanent lunar bases. The development of reusable rockets and advancements in propulsion technology have made space travel more cost-effective,
+    </div>
         </>
     )
 }
