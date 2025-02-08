@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Heart, Share2, ShoppingCart, Truck, RefreshCw, Star, Minus, Plus } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const SingleItem = () => {
@@ -9,6 +9,7 @@ const SingleItem = () => {
     const [mainImage, setMainImage] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
     const [quantity, setQuantity] = useState(1);
+    const navigate=useNavigate()
 
     let token;
     const storedTokenData = JSON.parse(localStorage.getItem("token"));
@@ -111,6 +112,7 @@ const SingleItem = () => {
 
             console.log("Cart Response:", response.data);
             alert("Product added to cart successfully!");
+          navigate("/product/cart")
         } catch (error) {
             console.error("Error adding to cart:", error.response?.data || error.message);
             alert("Failed to add product to cart.");
@@ -129,6 +131,8 @@ const SingleItem = () => {
     if (!product) return <div className="text-center text-xl mt-20">Loading...</div>;
 
     return (
+
+        
         <div className="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8 mt-16">
             {/* Image Gallery Section */}
             <div className="flex flex-col lg:flex-row gap-4">
@@ -226,10 +230,10 @@ const SingleItem = () => {
                             </div>
                         </div>
                         <div className="flex space-x-4 mt-4">
-                            <button className="flex-1 flex items-center justify-center bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition" onClick={() => addtocart(product._id)}>
+                            <button className="flex-1 flex items-center justify-center bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition" onClick={() => addtocart(product._id)}>
                                 <ShoppingCart className="mr-2" /> Add to Cart
                             </button>
-                            <button className="flex-1 flex items-center justify-center bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+                            <button className="flex-1 flex items-center justify-center bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition">
                                 Buy Now
                             </button>
                         </div>
