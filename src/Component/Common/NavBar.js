@@ -76,6 +76,9 @@ const NavBar = () => {
   const goToProfile=()=>{
     navigate(`/product/profile`)
   }
+  const goToWishList=()=>{
+    navigate(`/product/wishlist`)
+  }
 
   return (
     <>
@@ -179,7 +182,7 @@ const NavBar = () => {
               <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200"  onClick={()=>{goToProfile()}}>
                 <User className="w-5 h-5" /> {!isMobile && <span>Profile</span>}
               </div>
-              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200">
+              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={()=>{goToWishList()}}>
                 <Heart className="w-5 h-5" /> {!isMobile && <span>WishList</span>}
               </div>
 
