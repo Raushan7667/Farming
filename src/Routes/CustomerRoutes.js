@@ -16,6 +16,7 @@ import Footer from '../Component/Common/Footer'
 import SingleItem from '../Ecomerce/Product/SingleItem'
 import Cart from '../Ecomerce/Cart/Cart'
 import Profile from '../Ecomerce/Profile/Profile'
+import WishList from '../Ecomerce/WishList/WishList'
 
 const CustomerRoutes = () => {
   return (
@@ -34,7 +35,8 @@ const CustomerRoutes = () => {
         <Route path="/product/:id" element={<ProductPage />} />
         <Route path='/product/item/:productId' element={<SingleItem/>} />
         <Route path='/product/cart' element={<Cart/>} />
-        <Route path='/product/profile' element={<Profile/>} />    
+        <Route path='/product/profile' element={<Profile/>} /> 
+        <Route path='/product/wishlist' element={<WishList/>} />   
       </Routes>
       <Footer/>
     </>
