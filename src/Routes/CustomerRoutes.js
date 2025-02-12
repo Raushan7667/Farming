@@ -17,6 +17,7 @@ import SingleItem from '../Ecomerce/Product/SingleItem'
 import Cart from '../Ecomerce/Cart/Cart'
 import Profile from '../Ecomerce/Profile/Profile'
 import WishList from '../Ecomerce/WishList/WishList'
+import Search from '../Ecomerce/Product/Search'
 
 const CustomerRoutes = () => {
   return (
@@ -37,6 +38,7 @@ const CustomerRoutes = () => {
         <Route path='/product/cart' element={<Cart/>} />
         <Route path='/product/profile' element={<Profile/>} /> 
         <Route path='/product/wishlist' element={<WishList/>} />   
+        <Route path='/product/search' element={<Search/>} /> 
       </Routes>
       <Footer/>
     </>
