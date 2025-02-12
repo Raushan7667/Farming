@@ -88,28 +88,28 @@ const Cart = () => {
                   <div className="flex flex-col sm:flex-row gap-4">
                     <img
                       src={item?.product?.images[0] || "/api/placeholder/112/112"}
-                      alt={item.product.name}
+                      alt={item?.product?.name}
                       className="w-28 h-28 object-cover rounded-md flex-shrink-0"
                     />
                     <div className="flex-grow">
-                      <h3 className="font-semibold text-lg cursor-pointer hover:text-blue-600" onClick={()=>{goToProduct(item.product._id)}}>{item.product.name}</h3>
+                      <h3 className="font-semibold text-lg cursor-pointer hover:text-blue-600" onClick={()=>{goToProduct(item.product._id)}}>{item?.product?.name}</h3>
                       <div className="space-y-1 text-sm text-gray-600">
-                        <p>Size: {item.selectedsize}</p>
-                        <p>Shop: {item.product.fullShopDetails}</p>
+                        <p>Size: {item?.selectedsize}</p>
+                        <p>Shop: {item?.product?.fullShopDetails}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <span className="font-medium">Price:</span>
-                          <span className="line-through text-gray-500">₹{item.selectedPrice}</span>
-                          <span className="text-green-600 font-semibold">₹{item.selecetedDiscountedPrice}</span>
+                          <span className="line-through text-gray-500">₹{item?.selectedPrice}</span>
+                          <span className="text-green-600 font-semibold">₹{item?.selecetedDiscountedPrice}</span>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center justify-between mt-4 pt-2 border-t">
                     <p className="text-gray-600">
-                      Quantity: <span className="font-semibold">{item.quantity}</span>
+                      Quantity: <span className="font-semibold">{item?.quantity}</span>
                     </p>
                     <button
-                      onClick={() => removeItem(item._id)}
+                      onClick={() => removeItem(item?._id)}
                       className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors"
                     >
                       <Trash2 size={16} />
