@@ -18,10 +18,10 @@ const AgriSpecials = () => {
 
   {/* Third Section */}
   <div className="bg-white p-4">
-    <a href="/some product" className="block">
+    <a href="/product/item/67a856b47e174341d007b708" className="block">
       {/* Display Product Image */}
       <img
-        src="https://www.organicdews.com/assets/images/pro3/OD-AZOP-0011.png"
+        src="https://res.cloudinary.com/dtaz6cco4/image/upload/v1739085492/raushanMedia/abz1av0ea0wum2roqjt3.jpg"
         alt="product"
         className="w-full h-full object-cover"
       />
