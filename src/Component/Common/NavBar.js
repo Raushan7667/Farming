@@ -24,7 +24,7 @@ const NavBar = () => {
       localStorage.removeItem("token");
       setToken(null);
     }
-  }, []);
+  }, [token]);
 
   // Fetch user details if token exists
   useEffect(() => {
