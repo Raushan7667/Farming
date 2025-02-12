@@ -9,7 +9,9 @@ const SingleItem = () => {
     const [mainImage, setMainImage] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
     const [quantity, setQuantity] = useState(1);
-    const navigate=useNavigate()
+    const [wisListId, setWisListId] = useState(null);
+    const [isInWishlist, setIsInWishlist] = useState(false);
+    const navigate = useNavigate()
 
     let token;
     const storedTokenData = JSON.parse(localStorage.getItem("token"));
@@ -20,6 +22,26 @@ const SingleItem = () => {
         localStorage.removeItem("token");
         console.log("Token has expired");
     }
+    const fetchProductId = async () => {
+        try {
+            let response = await axios.get("http://localhost:4000/api/v1/products/wishlistid", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            console.log("wishlistid", response?.data)
+            // setWisListId()
+            setWisListId(response?.data?.items?.map(item => item.productId));
+
+        } catch (error) {
+
+        }
+    }
+
+    useEffect(() => {
+        fetchProductId()
+    }, [])
+    console.log("wishlistid", wisListId)
 
 
     const fetchProduct = async () => {
@@ -42,8 +64,23 @@ const SingleItem = () => {
             setSelectedSize(product?.price_size?.[0] || null);
         }
     }, [product]);
+    const removeFromWishList=async(productId)=>{
+        try {
+            let response=await axios.delete("http://localhost:4000/api/v1/products/removewishlist",{
+                productId
+            },
+            {
+                headers: { Authorization: `Bearer ${token}` },
+              })
+            
+        } catch (error) {
+            
+        }
+
+    }
 
     const addtoWishList = async (productId) => {
+        
 
         if (token) {
             const config = {
@@ -112,7 +149,7 @@ const SingleItem = () => {
 
             console.log("Cart Response:", response.data);
             alert("Product added to cart successfully!");
-          navigate("/product/cart")
+            navigate("/product/cart")
         } catch (error) {
             console.error("Error adding to cart:", error.response?.data || error.message);
             alert("Failed to add product to cart.");
@@ -132,7 +169,7 @@ const SingleItem = () => {
 
     return (
 
-        
+
         <div className="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8 mt-16">
             {/* Image Gallery Section */}
             <div className="flex flex-col lg:flex-row gap-4">
