@@ -246,5 +246,25 @@ exports.getProductsByCategory = async (req, res) => {
   };
 
 
+//   Search Product
+exports.seachProduct = async(req,res)=>{
+    try {
+        let { query } = req.query;
+        if (!query) return res.status(400).json({ message: "Query is required" });
+
+        // Create a case-insensitive regular expression for the search query
+        const searchRegex = new RegExp(query, 'i');
+
+        // Search products where any tag matches the complete query string
+        const products = await Product.find({
+            tag: { $regex: searchRegex }
+        });
+
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ message: "Server Error" });
+    }
+}
+
 
 
