@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const producrSchema = new mongoose.Schema({
-    fullShopDetails:{
-        type:String,
-        required:true,
+    fullShopDetails: {
+        type: String,
+        required: true,
     },
     name: {
         type: String,
@@ -29,33 +29,37 @@ const producrSchema = new mongoose.Schema({
             required: true,
         }
     ],
-    ratingandreview:[
+    ratingandreview: [
         {
-            type:mongoose.Schema.Types.ObjectId,
-            ref:"RatingAndReview",
-    
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "RatingAndReview",
+
         }
     ],
-    tag:[
+    tag: [
         {
-            type:String,
+            type: String,
             required: true,
-            
+
         }
-       
+
     ],
-    createdAt:{
+    createdAt: {
         type: Date,
         default: Date.now()
     },
-    badges:{
-        type:String,
-       
-       // enum:['Best Seller', 'Featured', 'New Arrival'],
-        default:'New Arrival'
+    badges: {
+        type: String,
+
+        // enum:['Best Seller', 'Featured', 'New Arrival'],
+        default: 'New Arrival'
 
     },
-    updatedAt:{
+    avgRating: {
+        type: Number,
+        default: 0
+    }, // New field to store the average rating
+    updatedAt: {
         type: Date,
         default: Date.now()
     }
