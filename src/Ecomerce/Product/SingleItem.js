@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Heart, Share2, ShoppingCart, Truck, RefreshCw, Star, Minus, Plus } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import RatingAndReview from './RatingAndReview';
+
 
 const SingleItem = () => {
     const { productId } = useParams();
@@ -169,7 +171,7 @@ const SingleItem = () => {
 
     return (
 
-
+       <>
         <div className="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8 mt-16">
             {/* Image Gallery Section */}
             <div className="flex flex-col lg:flex-row gap-4">
@@ -180,7 +182,7 @@ const SingleItem = () => {
                             key={index}
                             src={image}
                             alt={`Product thumbnail ${index + 1}`}
-                            className={`w-16 h-16 lg:w-20 lg:h-20 object-cover rounded-lg cursor-pointer  
+                            className={`w-16 h-16 lg:w-20 lg:h-20 object-contain rounded-lg cursor-pointer  
                                 ${mainImage === image ? 'border-2 border-blue-500' : 'opacity-70 hover:opacity-100'}`}
                             onClick={() => setMainImage(image)}
 
@@ -193,7 +195,7 @@ const SingleItem = () => {
                     <img
                         src={mainImage || "fallback-image-url"}
                         alt={product.name}
-                        className="w-full h-[400px] lg:h-[500px] object-cover rounded-lg shadow-lg"
+                        className="w-full h-[400px] lg:h-[500px] object-contain rounded-lg shadow-lg"
                     />
                     <div className="absolute top-4 right-4 flex space-x-2">
                         <button className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition" aria-label="Add to Wishlist">
@@ -338,6 +340,10 @@ const SingleItem = () => {
                 </div>
             </div>
         </div>
+        <div>
+           <RatingAndReview productId={productId}/>
+        </div>
+        </>
     );
 };
 

@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const navigate=useNavigate()
+  const navigate = useNavigate();
 
   const calculateDiscount = () => {
     const originalPrice = product.price_size[0].price;
@@ -25,11 +23,9 @@ const ProductCard = ({ product }) => {
     }
   }, [isHovered, product.images.length]);
 
-
-  const goToProduct=async(productId)=>{
-    navigate(`/product/item/${productId}`)
-
-  }
+  const goToProduct = async (productId) => {
+    navigate(`/product/item/${productId}`);
+  };
 
   return (
     <div
@@ -42,7 +38,7 @@ const ProductCard = ({ product }) => {
     >
       {/* Heart Icon */}
       <div className="absolute top-2 right-2 z-10">
-        <Heart className="text-red-500 size-6 cursor-pointer" />
+        <Heart className="text-slate-400 size-6 cursor-pointer opacity-60 fill-slate-400" />
       </div>
 
       {/* Image Container */}
@@ -58,24 +54,29 @@ const ProductCard = ({ product }) => {
             onClick={() => goToProduct(product._id)}
           />
         ))}
-            {/* Dots Navigation */}
-      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1 z-10">
-        {product.images.map((_, index) => (
-          <div
-            key={index}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              currentImageIndex === index ? "bg-green-500 w-3" : "bg-gray-300"
-            }`}
-          />
-        ))}
-      </div>
-      </div>
 
-  
+        {/* Rating Display (Bottom Right) */}
+        <div className="absolute bottom-2 right-2 bg-green-200  text-xs sm:text-sm px-2 py-1 rounded-md shadow-md text-black">
+          ⭐ {product.avgRating ? product.avgRating.toFixed(1) : "N/A"}
+        </div>
+
+        {/* Dots Navigation */}
+        <div className=" opacity-0 hover:opacity-100
+         absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1 z-10">
+          {product.images.map((_, index) => (
+            <div
+              key={index}
+              className={`w-1 h-1 rounded-full transition-all duration-300 ${
+                currentImageIndex === index ? "bg-green-500 w-3" : "bg-gray-300"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
 
       {/* Product Info */}
       <div className="p-4">
-        <h3 className="text-sm sm:text-lg font-semibold text-gray-800 mb-1 truncate">
+        <h3 className="text-sm sm:text-lg  text-gray-800 mb-1 truncate">
           {product.name}
         </h3>
         <div className="flex flex-wrap items-center gap-2 mb-2 text-sm sm:text-base">
@@ -90,3 +91,4 @@ const ProductCard = ({ product }) => {
 };
 
 export default ProductCard;
+
