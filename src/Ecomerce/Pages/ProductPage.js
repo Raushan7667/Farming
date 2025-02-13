@@ -51,7 +51,7 @@ const ProductPage = () => {
       (!filters.size || prod.size === filters.size) &&
       (!filters.minPrice || prod?.price_size[0]?.discountedPrice >= filters.minPrice) &&
       (!filters.maxPrice || prod?.price_size[0]?.discountedPrice <= filters.maxPrice) &&
-      (!filters.rating || prod.rating >= filters.rating)
+      (!filters.rating || prod.avgRating>= filters.rating)
     );
   });
 
