@@ -23,7 +23,7 @@ const Filter = ({ filters, onFilterChange, onResetFilters, productStats }) => {
   };
 
   const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
-  const maxPrice = 1000000;
+  const maxPrice = 10000;
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -57,7 +57,7 @@ const Filter = ({ filters, onFilterChange, onResetFilters, productStats }) => {
               name="priceSlider"
               min="0"
               max={maxPrice}
-              step="1000"
+              step="50"
               value={filters.maxPrice || 0}
               onChange={handlePriceRangeChange}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
