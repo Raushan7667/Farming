@@ -53,7 +53,7 @@ exports.getAllRatingsAndReviews = async (req, res) => {
 
         // Fetch all reviews for the product
         const reviews = await RatingAndReview.find({ product: productId })
-            .populate("user", "name") // Populates user details (only name)
+            .populate("user", "Name") // Populates user details (only name)
             .sort({ createdAt: -1 }); // Sort by latest reviews
 
         res.status(200).json({ success: true, data: reviews });
