@@ -1,15 +1,44 @@
 import React, { useState } from 'react';
 import { Mail, ArrowLeft } from 'lucide-react'
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const ForgetPassword = () => {
     const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    console.log('Reset email sent to:', email);
-  };
+    try {
+      const response = await axios.post("http://localhost:4000/api/v1/auth/resetpasswordtoken", {
+        email: email
+      });
+      
+      console.log("response of reset password", response);
+      
+      if (response.data.success) {
+        setIsSubmitted(true);
+        setError("");
+        toast.success("Reset password link sent to your email!");
+        console.log('Reset email sent to:', email);
+      } else {
+        setError("Failed to send reset email");
+        toast.error(response.data.message || "Failed to send reset email");
+      }
+
+    } catch (error) {
+      console.error("Error in reset password:", error);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          "Something went wrong. Please try again.";
+                          
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setIsSubmitted(false);
+    }
+};
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">

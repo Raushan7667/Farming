@@ -1,14 +1,18 @@
 import axios from 'axios';
 import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import React, { useState } from 'react'
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { setSignupData } from '../../slice/authSlice';
+import { sendOtp } from '../../services/operations/authApi';
 
 const SignUp = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
+    const dispatch = useDispatch()
     const [formData, setFormData] = useState({
-        fullName: '',
+        Name: '',
         email: '',
         accountType: '',
         password: '',
@@ -21,7 +25,7 @@ const SignUp = () => {
 
         try {
 
-            if (formData.password !== formData.confirmPassword) {
+            if (formData.password !== formData. confirmPassword) {
                 setPasswordError('Passwords do not match');
                 return;
             }
@@ -32,21 +36,20 @@ const SignUp = () => {
                 setFormData({ ...formData, email: '' });
                 return alert('Invalid email format');
             }
-
+            const signupData = {
+                ...formData,
+            }
             //api call to send otp
+            dispatch(setSignupData(signupData,navigate))
+            dispatch(sendOtp(formData.email, navigate))
 
-            let response = await axios.post('http://localhost:4000/api/v1/auth/sendotp', {
-                email: formData.email
+            setFormData({
+                Name: '',
+                email: '',
+                accountType: '',
+                password: '',
+                confirmPassword: ''
             })
-
-             // Navigate to Verify Email page with formData and OTP
-      navigate('/verifyemail', {
-        state: { 
-         formData: formData,
-          otp: response.data.otp,
-        },
-      });
-            console.log('Email sent successfully:', response.data.otp);
         } catch (error) {
             if (error.response) {
                 // Server responded with a status code outside the 2xx range
@@ -60,7 +63,7 @@ const SignUp = () => {
             }
         }
 
-       
+
     };
 
 
@@ -89,8 +92,8 @@ const SignUp = () => {
                                 required
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:green-green-500 transition-colors"
                                 placeholder="John Doe"
-                                value={formData.fullName}
-                                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                value={formData.Name}
+                                onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
                             />
                         </div>
                     </div>
@@ -125,8 +128,8 @@ const SignUp = () => {
                             onChange={(e) => setFormData({ ...formData, accountType: e.target.value })}
                         >
                             <option value="">Select account type</option>
-                            <option value="user">User</option>
-                            <option value="business">Farmer</option>
+                            <option value="User">User</option>
+                            <option value="Business">Farmer</option>
                             <option value="Seller">Seller</option>
                         </select>
                     </div>
@@ -172,8 +175,8 @@ const SignUp = () => {
                                 required
                                 className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-600 transition-colors"
                                 placeholder="••••••••"
-                                value={formData.confirmPassword}
-                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                value={formData. confirmPassword}
+                                onChange={(e) => setFormData({ ...formData,  confirmPassword: e.target.value })}
                             />
                             <button
                                 type="button"
