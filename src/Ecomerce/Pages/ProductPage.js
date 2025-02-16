@@ -12,6 +12,7 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(false);
   const [secondLevecategorydata, setSecondLevecategorydata] = useState(false);
   const [filters, setFilters] = useState({ size: '', minPrice: '', maxPrice: '', rating: '' });
+  
 
   const fetchCategory = async () => {
     try {
@@ -102,7 +103,7 @@ const ProductPage = () => {
             
 
               {/* Product Grid Section */}
-              <div  className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-3">
+              <div  className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-3 mb-2">
                 {filteredProducts.length > 0 ? (
                   filteredProducts.map(prod => <ProductCard key={prod._id} product={prod} />)
                 ) : (

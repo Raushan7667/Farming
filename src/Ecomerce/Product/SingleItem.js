@@ -284,7 +284,7 @@ const SingleItem = () => {
 
             {/* Product Details */}
             <div>
-                <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
+                <h1 className="text-2xl text-[#1b2c0a] font-bold mb-2">{product.name}</h1>
 
                 {/* Desktop Price Display */}
                 <div className="hidden lg:block  p-4 rounded-lg mb-4">
