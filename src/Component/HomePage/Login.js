@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -23,6 +24,7 @@ const Login = () => {
       // localStorage.setItem("token",response.data.token)
       // const token = localStorage.getItem("token")
       // console.log("token is",token)
+      toast.success("Login success")
 
       const tokenData = {
         value: response.data.token,
