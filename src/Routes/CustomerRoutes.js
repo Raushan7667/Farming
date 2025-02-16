@@ -18,6 +18,7 @@ import Cart from '../Ecomerce/Cart/Cart'
 import Profile from '../Ecomerce/Profile/Profile'
 import WishList from '../Ecomerce/WishList/WishList'
 import Search from '../Ecomerce/Product/Search'
+import UpdatePassword from '../Component/Common/UpdatePassword'
 
 const CustomerRoutes = () => {
   return (
@@ -39,6 +40,7 @@ const CustomerRoutes = () => {
         <Route path='/product/profile' element={<Profile/>} /> 
         <Route path='/product/wishlist' element={<WishList/>} />   
         <Route path='/product/search' element={<Search/>} /> 
+        <Route path='/update-password/:token' element={<UpdatePassword/>} /> 
       </Routes>
       <Footer/>
     </>
