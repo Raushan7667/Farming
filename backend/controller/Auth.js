@@ -69,14 +69,14 @@ exports.SignUp=async (req,res)=>{
      
             email,
             password,
-            confermPassword,
+            confirmPassword,
             otp,
             accountType
         } = req.body
 
-        console.log("in authentication ",Name,  email, password, otp, accountType,confermPassword)
+        console.log("in authentication ",Name,  email, password, otp, accountType,confirmPassword)
         // validate karo lo
-        if (!Name ||  !email || !password || !confermPassword || !otp) {
+        if (!Name ||  !email || !password || !confirmPassword || !otp) {
             return res.status(403).json({
                 success: false,
                 message: "All field are reqired"
@@ -84,7 +84,7 @@ exports.SignUp=async (req,res)=>{
         }
 
         // match both password
-        if (password !== confermPassword) {
+        if (password !== confirmPassword) {
             return res.status(400).json({
                 success: false,
                 message: "Password and conferm password doesn't match please try again"
