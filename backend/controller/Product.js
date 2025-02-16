@@ -246,25 +246,39 @@ exports.getProductsByCategory = async (req, res) => {
   };
 
 
-//   Search Product
-exports.seachProduct = async(req,res)=>{
+exports.seachProduct = async (req, res) => {
     try {
-        let { query } = req.query;
+        let { query, page, limit } = req.query;
         if (!query) return res.status(400).json({ message: "Query is required" });
 
-        // Create a case-insensitive regular expression for the search query
-        const searchRegex = new RegExp(query, 'i');
+        const words = query.split(" "); // Split query into words
+        const searchRegexArray = words.map(word => new RegExp(word, 'i')); // Create regex for each word
 
-        // Search products where any tag matches the complete query string
-        const products = await Product.find({
-            tag: { $regex: searchRegex }
+        const pageNumber = parseInt(page);
+        const pageSize = parseInt(limit);
+
+        const totalProducts = await Product.countDocuments({
+            tag: { $in: searchRegexArray } // Match if any tag contains any word
         });
 
-        res.json(products);
+        const products = await Product.find({
+            tag: { $in: searchRegexArray }
+        })
+            .skip((pageNumber - 1) * pageSize)
+            .limit(pageSize);
+
+        res.json({
+            totalProducts,
+            totalPages: Math.ceil(totalProducts / pageSize),
+            currentPage: pageNumber,
+            pageSize,
+            products,
+        });
     } catch (error) {
         res.status(500).json({ message: "Server Error" });
     }
-}
+};
+
 
 
 
