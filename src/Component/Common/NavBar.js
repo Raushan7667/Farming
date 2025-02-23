@@ -2,6 +2,7 @@ import axios from "axios";
 import { Bell, Heart, Search, Server, ShoppingCart, Store, User } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import logo from '../../Data/Logo/logo.png'
 
 const NavBar = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -69,14 +70,14 @@ const NavBar = () => {
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [mobileMenu]);
 
-  const goTocart=(id)=>{
+  const goTocart = (id) => {
     navigate(`/product/cart`)
   }
 
-  const goToProfile=()=>{
+  const goToProfile = () => {
     navigate(`/product/profile`)
   }
-  const goToWishList=()=>{
+  const goToWishList = () => {
     navigate(`/product/wishlist`)
   }
 
@@ -86,9 +87,9 @@ const NavBar = () => {
         <nav className="bg-green-600 text-white shadow-lg fixed top-0 left-0 w-full z-50">
           <div className="container mx-auto px-4 flex justify-between items-center py-4">
             {/* Logo */}
-            <Link to="/" className="text-2xl font-bold">
-              eFarming
-            </Link>
+            <Link to="/" className="flex items-center">
+                <img src={logo} alt="PreciAgri Logo" className="h-10 w-40 objec-fit" />
+              </Link>
 
             {/* Links */}
             <ul className="hidden md:flex space-x-6">
@@ -156,7 +157,9 @@ const NavBar = () => {
             {/* Logo & Search */}
             <div className="flex items-center gap-4 md:gap-8 w-full">
               {/* Logo */}
-              <Link to="/" className="text-2xl font-bold whitespace-nowrap">eFarming</Link>
+              <Link to="/" className="flex items-center">
+                <img src={logo} alt="PreciAgri Logo" className="h-10 w-auto" />
+              </Link>
 
               {/* Search Bar */}
               <div className="flex items-center border border-gray-300 rounded-lg shadow-sm bg-green-200 w-full max-w-lg">
@@ -176,13 +179,13 @@ const NavBar = () => {
 
             {/* Cart, Profile & Notification */}
             <div className="flex items-center gap-4 md:gap-6">
-              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={()=>{goTocart()}}>
+              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={() => { goTocart() }}>
                 <ShoppingCart className="w-5 h-5" /> {!isMobile && <span>Cart</span>}
               </div>
-              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200"  onClick={()=>{goToProfile()}}>
+              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={() => { goToProfile() }}>
                 <User className="w-5 h-5" /> {!isMobile && <span>Profile</span>}
               </div>
-              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={()=>{goToWishList()}}>
+              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={() => { goToWishList() }}>
                 <Heart className="w-5 h-5" /> {!isMobile && <span>WishList</span>}
               </div>
 
@@ -193,7 +196,7 @@ const NavBar = () => {
                   onClick={() => navigate("/seller")}
                 >
                   <Store className="w-5 h-5" />  {!isMobile && <span>Sell Now</span>}
-                
+
                 </div>
               )}
             </div>
