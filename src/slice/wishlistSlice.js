@@ -21,7 +21,7 @@ const initialState = {
         const index = state.wishlist.findIndex((item) => item._id === product._id)
   
         if (index >= 0) {
-          // If the course is already in the cart, do not modify the quantity
+          // If the product is already in the cart, do not modify the quantity
           toast.error("Course already in cart")
           return
         }
@@ -29,25 +29,25 @@ const initialState = {
         state.wishlist.push(product)
         // Update the total quantity and price
         state.totalItems++
-        state.total += wishlist.price
+        // state.total += wishlist.price
         // Update to localstorage
         localStorage.setItem("wishlist", JSON.stringify(state.wishlist))
         localStorage.setItem("total", JSON.stringify(state.total))
         localStorage.setItem("totalItems", JSON.stringify(state.totalItems))
         // show toast
-        toast.success("Product added to cart")
+        toast.success("Product added to wishlist")
       },
       removeFromWishlist: (state, action) => {
         const productId = action.payload
         const index = state.wishlist.findIndex((item) => item._id === productId)
   
         if (index >= 0) {
-          // If the course is found in the cart, remove it
+          // If the product is found in the wishlist, remove it
           state.totalItems--
           state.total -= state.cart[index].price
-          state.cart.splice(index, 1)
+          state.wishlist.splice(index, 1)
           // Update to localstorage
-          localStorage.setItem("wishlist", JSON.stringify(state.cart))
+          localStorage.setItem("wishlist", JSON.stringify(state.wishlist))
           localStorage.setItem("total", JSON.stringify(state.total))
           localStorage.setItem("totalItems", JSON.stringify(state.totalItems))
           // show toast
