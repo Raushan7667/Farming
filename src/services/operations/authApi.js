@@ -118,6 +118,32 @@ const {
       toast.dismiss(toastId)
     }
   }
+
+  export function getPasswordResetToken(email, setEmailSent) {
+    return async (dispatch) => {
+      const toastId = toast.loading("Loading...")
+      dispatch(setLoading(true))
+      try {
+        const response = await apiConnector("POST", RESETPASSTOKEN_API, {
+          email,
+        })
+  
+        console.log("RESETPASSTOKEN RESPONSE............", response)
+  
+        if (!response.data.success) {
+          throw new Error(response.data.message)
+        }
+  
+        toast.success("Reset Email Sent")
+        setEmailSent(true)
+      } catch (error) {
+        console.log("RESETPASSTOKEN ERROR............", error)
+        toast.error("Failed To Send Reset Email")
+      }
+      toast.dismiss(toastId)
+      dispatch(setLoading(false))
+    }
+  }
   export function logout(navigate) {
     return (dispatch) => {
       dispatch(setToken(null))
