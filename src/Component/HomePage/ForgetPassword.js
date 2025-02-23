@@ -2,30 +2,35 @@ import React, { useState } from 'react';
 import { Mail, ArrowLeft } from 'lucide-react'
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { getPasswordResetToken } from '../../services/operations/authApi';
 
 const ForgetPassword = () => {
     const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [emailSent, setEmailSent] = useState(false)
+  const dispatch=useDispatch()
 
   const handleSubmit = async(e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:4000/api/v1/auth/resetpasswordtoken", {
-        email: email
-      });
+      dispatch(getPasswordResetToken(email,setEmailSent))
+      // const response = await axios.post("http://localhost:4000/api/v1/auth/resetpasswordtoken", {
+      //   email: email
+      // });
       
-      console.log("response of reset password", response);
+      // console.log("response of reset password", response);
       
-      if (response.data.success) {
-        setIsSubmitted(true);
-        setError("");
-        toast.success("Reset password link sent to your email!");
-        console.log('Reset email sent to:', email);
-      } else {
-        setError("Failed to send reset email");
-        toast.error(response.data.message || "Failed to send reset email");
-      }
+      // if (response.data.success) {
+      //   setIsSubmitted(true);
+      //   setError("");
+      //   toast.success("Reset password link sent to your email!");
+      //   console.log('Reset email sent to:', email);
+      // } else {
+      //   setError("Failed to send reset email");
+      //   toast.error(response.data.message || "Failed to send reset email");
+      // }
 
     } catch (error) {
       console.error("Error in reset password:", error);

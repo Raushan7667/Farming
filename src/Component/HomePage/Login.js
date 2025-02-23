@@ -3,53 +3,56 @@ import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { login } from '../../services/operations/authApi';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const dispatch=useDispatch()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false
   });
   const navigate=useNavigate();
-
+  const { email, password } = formData
   const handleSubmit = async(e) => {
     e.preventDefault();
     console.log("hii in login")
     try {
-      let response=await axios.post("http://localhost:4000/api/v1/auth/login",{
-        email: formData.email,
-        password: formData.password
-      })
+      dispatch(login(email,password,navigate))
+      // let response=await axios.post("http://localhost:4000/api/v1/auth/login",{
+      //   email: formData.email,
+      //   password: formData.password
+      // })
       // localStorage.setItem("token",response.data.token)
       // const token = localStorage.getItem("token")
       // console.log("token is",token)
-      toast.success("Login success")
 
-      const tokenData = {
-        value: response.data.token,
-        expires: Date.now() + 86400000, // 24 hours from now
-      };
+      // const tokenData = {
+      //   value: response.data.token,
+      //   expires: Date.now() + 86400000, // 24 hours from now
+      // };
       
-      localStorage.setItem("token", JSON.stringify(tokenData));
+      // localStorage.setItem("token", JSON.stringify(tokenData));
       
-      const storedTokenData = JSON.parse(localStorage.getItem("token"));
-      if (storedTokenData && Date.now() < storedTokenData.expires) {
-        console.log("Token:", storedTokenData.value);
-      } else {
-        localStorage.removeItem("token");
-        console.log("Token has expired");
-      }
-      console.log("resp during login",response)
-      navigate('/')
-      if(response?.status){
-        // set token in local storage
+      // const storedTokenData = JSON.parse(localStorage.getItem("token"));
+      // if (storedTokenData && Date.now() < storedTokenData.expires) {
+      //   console.log("Token:", storedTokenData.value);
+      // } else {
+      //   localStorage.removeItem("token");
+      //   console.log("Token has expired");
+      // }
+      // console.log("resp during login",response)
+      // navigate('/')
+      // if(response?.status){
+      //   // set token in local storage
        
     
-        // navigate to home page
+      //   // navigate to home page
        
-      }
-      console.log("response during login",response)
+      // }
+      // console.log("response during login",response)
 
       
     } catch (error) {
