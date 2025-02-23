@@ -3,6 +3,8 @@ import { Heart, Share2, ShoppingCart, Truck, RefreshCw, Star, Minus, Plus } from
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import RatingAndReview from './RatingAndReview';
+import toast from 'react-hot-toast';
+import copy from "copy-to-clipboard"
 
 
 const SingleItem = () => {
@@ -81,8 +83,17 @@ const SingleItem = () => {
 
     }
 
+    const handleShare = () => {
+        copy(window.location.href)
+        toast.success("Link copied to clipboard")
+      }
+
     const addtoWishList = async (productId) => {
         
+        // const{
+
+
+        // }=product;
 
         if (token) {
             const config = {
@@ -130,6 +141,12 @@ const SingleItem = () => {
         let selectedsize = selectedSize.size;
         let selecetedDiscountedPrice = selectedSize.discountedPrice;
         let selectedPrice = selectedSize.price;
+        // const {
+        //     selectedSize,
+        //     selecetedDiscountedPrice,
+
+
+        // }=product
 
         try {
             const response = await axios.post(
@@ -205,7 +222,7 @@ const SingleItem = () => {
                                 }}
                             />
                         </button>
-                        <button className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition" aria-label="Share">
+                        <button className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition" aria-label="Share" onClick={()=>{handleShare()}}>
                             <Share2 size={24} className="text-gray-600" />
                         </button>
                     </div>
