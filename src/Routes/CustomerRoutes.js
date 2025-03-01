@@ -15,10 +15,18 @@ import ForgetPassword from '../Component/HomePage/ForgetPassword'
 import Footer from '../Component/Common/Footer'
 import SingleItem from '../Ecomerce/Product/SingleItem'
 import Cart from '../Ecomerce/Cart/Cart'
-import Profile from '../Ecomerce/Profile/Profile'
+
 import WishList from '../Ecomerce/WishList/WishList'
 import Search from '../Ecomerce/Product/Search'
 import UpdatePassword from '../Component/Common/UpdatePassword'
+import AddAddress from '../Ecomerce/Address/AddAdress'
+import ProfileLayout from '../Ecomerce/Profile/Profile'
+import ProfileInformation from '../Ecomerce/Profile/ProfileInformation'
+import Address from '../Ecomerce/Profile/Address'
+import Order from '../Ecomerce/Profile/Order'
+
+import CheckoutProduct from '../Ecomerce/Checkout/CheckoutProduct'
+
 
 const CustomerRoutes = () => {
   return (
@@ -37,10 +45,15 @@ const CustomerRoutes = () => {
         <Route path="/product/:id" element={<ProductPage />} />
         <Route path='/product/item/:productId' element={<SingleItem/>} />
         <Route path='/product/cart' element={<Cart/>} />
-        <Route path='/product/profile' element={<Profile/>} /> 
+        <Route path='/product/profile' element={<ProfileLayout/>} /> 
         <Route path='/product/wishlist' element={<WishList/>} />   
         <Route path='/product/search' element={<Search/>} /> 
         <Route path='/update-password/:token' element={<UpdatePassword/>} /> 
+        <Route path='/add-address' element={<AddAddress/>} />
+        <Route path="/product/profile/information" element={<ProfileInformation/>} />
+        <Route path="/product/profile/addresses" element={<Address/>} />
+        <Route path="/product/profile/orders" element={<Order/>} />
+        <Route path="/product/checkout" element={<CheckoutProduct/>} />
       </Routes>
       <Footer/>
     </>
