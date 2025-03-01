@@ -1,23 +1,26 @@
-import axios from "axios";
-import { Bell, Heart, Search, Server, ShoppingCart, Store, User } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import logo from '../../Data/Logo/logo.png'
+import { Bell, Heart, Search, Server, ShoppingCart, Store, User } from "lucide-react";
+import logo from "../../Data/Logo/logo.png";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 const NavBar = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [userImage, setUserImage] = useState("");
-  const [userRole, setUserRole] = useState("");
   const [query, setQuery] = useState("");
   const [token, setToken] = useState(null);
+  const [userImage, setUserImage] = useState("");
+  const [userRole, setUserRole] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const menuRef = useRef(null);
 
-  // Token handling
+  // Redux state
+  const wishlistCount = useSelector((state) => state.wishlist.totalItems);
+  const user = useSelector((state) => state.profile.user);
+
+  // Handle token expiration and fetch user details
   useEffect(() => {
-    // localStorage.removeItem("token");
     const storedTokenData = JSON.parse(localStorage.getItem("token"));
     if (storedTokenData && Date.now() < storedTokenData.expires) {
       setToken(storedTokenData.value);
@@ -25,9 +28,8 @@ const NavBar = () => {
       localStorage.removeItem("token");
       setToken(null);
     }
-  }, [token]);
+  }, []);
 
-  // Fetch user details if token exists
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -43,17 +45,13 @@ const NavBar = () => {
     if (token) fetchUser();
   }, [token]);
 
-  // Update active section based on the route
+  // Active section based on route
   const [activeSection, setActiveSection] = useState("");
   useEffect(() => {
     setActiveSection(location.pathname.startsWith("/product") ? "product" : "");
   }, [location]);
 
-  // Handle search function
-  const handleSearch = () => {
-    navigate(`/product/search?query=${query}`);
-  };
-
+  // Handle outside click for mobile menu
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -61,25 +59,15 @@ const NavBar = () => {
       }
     };
 
-    if (mobileMenu) {
-      document.addEventListener("mousedown", handleOutsideClick);
-    } else {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    }
-
+    document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [mobileMenu]);
+  }, []);
 
-  const goTocart = (id) => {
-    navigate(`/product/cart`)
-  }
-
-  const goToProfile = () => {
-    navigate(`/product/profile`)
-  }
-  const goToWishList = () => {
-    navigate(`/product/wishlist`)
-  }
+  // Handlers
+  const handleSearch = () => navigate(`/product/search?query=${query}`);
+  const goToCart = () => navigate("/product/cart");
+  const goToProfile = () => navigate("/product/profile");
+  const goToWishList = () => navigate("/product/wishlist");
 
   return (
     <>
@@ -88,8 +76,8 @@ const NavBar = () => {
           <div className="container mx-auto px-4 flex justify-between items-center py-4">
             {/* Logo */}
             <Link to="/" className="flex items-center">
-                <img src={logo} alt="PreciAgri Logo" className="h-10 w-40 objec-fit" />
-              </Link>
+              <img src={logo} alt="PreciAgri Logo" className="h-10 w-40 object-contain" />
+            </Link>
 
             {/* Links */}
             <ul className="hidden md:flex space-x-6">
@@ -108,7 +96,7 @@ const NavBar = () => {
                 <div className="flex gap-5 items-center">
                   <li>
                     <Link to="/profile" className="hover:text-gray-200 font-bold">
-                      <img src={userImage} alt="User Profile" className="w-8 h-8 rounded-full object-cover z-30" />
+                      <img src={userImage} alt="User Profile" className="w-8 h-8 rounded-full object-cover" />
                     </Link>
                   </li>
                   <li>
@@ -121,13 +109,18 @@ const NavBar = () => {
             </ul>
 
             {/* Mobile Menu Toggle */}
-            <button className="md:hidden text-white focus:outline-none" onClick={() => setMobileMenu(!mobileMenu)}>☰</button>
+            <button
+              className="md:hidden text-white focus:outline-none"
+              onClick={() => setMobileMenu(!mobileMenu)}
+            >
+              ☰
+            </button>
           </div>
 
           {/* Mobile Menu */}
           {mobileMenu && (
-            <div ref={menuRef} className=" block md:hidden" onClick={() => setMobileMenu(false)}>
-              <ul className="space-y-4 px-4 py-2 bg-green-700">
+            <div ref={menuRef} className="block md:hidden" onClick={() => setMobileMenu(false)}>
+              <ul className="space-y-0 px-4 py-2 bg-green-700 flex justify-between items-center">
                 <li><Link to="/" className="hover:text-gray-200">Home</Link></li>
                 <li><Link to="/news" className="hover:text-gray-200">News</Link></li>
                 <li><Link to="/about" className="hover:text-gray-200">About Us</Link></li>
@@ -140,9 +133,17 @@ const NavBar = () => {
                     <li><Link to="/login" className="font-bold hover:text-gray-200">Login</Link></li>
                   </div>
                 ) : (
-                  <div className="flex gap-5">
-                    <li><Link to="/profile" className="hover:text-gray-200 font-bold"><User className="w-5 h-5" /></Link></li>
-                    <li><Link to="/server" className="hover:text-gray-200 font-bold"><Server className="w-5 h-5" /></Link></li>
+                  <div className="flex gap-5 items-center">
+                    <li>
+                      <Link to="/profile" className="hover:text-gray-200 font-bold">
+                        <img src={userImage} alt="User Profile" className="w-8 h-8 rounded-full object-cover" />
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/server" className="hover:text-gray-200 font-bold">
+                        <Server className="w-5 h-5" />
+                      </Link>
+                    </li>
                   </div>
                 )}
               </ul>
@@ -150,18 +151,13 @@ const NavBar = () => {
           )}
         </nav>
       ) : (
-
         <div className="fixed top-0 left-0 w-full bg-green-600 text-white shadow-lg z-50">
           <div className="flex items-center justify-between px-4 md:px-8 py-3">
-
             {/* Logo & Search */}
             <div className="flex items-center gap-4 md:gap-8 w-full">
-              {/* Logo */}
               <Link to="/" className="flex items-center">
                 <img src={logo} alt="PreciAgri Logo" className="h-10 w-auto" />
               </Link>
-
-              {/* Search Bar */}
               <div className="flex items-center border border-gray-300 rounded-lg shadow-sm bg-green-200 w-full max-w-lg">
                 <button onClick={handleSearch} className="p-2 text-gray-500 hover:text-gray-700">
                   <Search className="w-5 h-5" />
@@ -179,30 +175,32 @@ const NavBar = () => {
 
             {/* Cart, Profile & Notification */}
             <div className="flex items-center gap-4 md:gap-6">
-              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={() => { goTocart() }}>
-                <ShoppingCart className="w-5 h-5" /> {!isMobile && <span>Cart</span>}
+              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={goToCart}>
+                <ShoppingCart className="w-5 h-5" />
+                <span className="hidden md:inline">Cart</span>
               </div>
-              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={() => { goToProfile() }}>
-                <User className="w-5 h-5" /> {!isMobile && <span>Profile</span>}
+              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={goToProfile}>
+                <User className="w-5 h-5" />
+                <span className="hidden md:inline">Profile</span>
               </div>
-              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={() => { goToWishList() }}>
-                <Heart className="w-5 h-5" /> {!isMobile && <span>WishList</span>}
+              <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={goToWishList}>
+                <Heart className="w-5 h-5 relative" />
+                {wishlistCount > 0 && (
+                  <span className="absolute top-[15px] right-[85px] bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
+                <span className="hidden md:inline">Wishlist</span>
               </div>
-
-              {/* Seller Button (Only for Sellers) */}
               {userRole === "Seller" && (
-                <div
-                  className="flex items-center gap-2 cursor-pointer hover:text-gray-200"
-                  onClick={() => navigate("/seller")}
-                >
-                  <Store className="w-5 h-5" />  {!isMobile && <span>Sell Now</span>}
-
+                <div className="flex items-center gap-2 cursor-pointer hover:text-gray-200" onClick={() => navigate("/seller")}>
+                  <Store className="w-5 h-5" />
+                  <span className="hidden md:inline">Sell Now</span>
                 </div>
               )}
             </div>
           </div>
         </div>
-
       )}
     </>
   );
