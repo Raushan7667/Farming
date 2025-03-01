@@ -22,7 +22,7 @@ const initialState = {
   
         if (index >= 0) {
           // If the product is already in the cart, do not modify the quantity
-          toast.error("Course already in cart")
+          toast.error("Product already in cart")
           return
         }
         // If the course is not in the cart, add it to the cart
@@ -39,12 +39,13 @@ const initialState = {
       },
       removeFromWishlist: (state, action) => {
         const productId = action.payload
+        console.log("productId", productId)
         const index = state.wishlist.findIndex((item) => item._id === productId)
   
         if (index >= 0) {
           // If the product is found in the wishlist, remove it
           state.totalItems--
-          state.total -= state.cart[index].price
+          state.total -= state.wishlist[index].price
           state.wishlist.splice(index, 1)
           // Update to localstorage
           localStorage.setItem("wishlist", JSON.stringify(state.wishlist))

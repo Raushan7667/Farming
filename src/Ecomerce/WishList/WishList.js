@@ -1,47 +1,55 @@
 import axios from 'axios';
 import { Shield, ShoppingCart, Star, Stars, Trash2, TrendingUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { removeFromWishlist } from '../../slice/wishlistSlice';
 
 const WishList = () => {
   const [wisListproduct, setwishListProduct] = useState(null)
   const [token, setToken] = useState(null);
   const navigate = useNavigate()
+  const dispatch=useDispatch()
+  const { wishlist } = useSelector((state) => state.wishlist)
+  console.log("wishlist", wishlist)
 
 
-  const fetchProduct = async () => {
-    try {
-      const response = await axios.get("http://localhost:4000/api/v1/products/getdetailswishlist", {
-        headers: { Authorization: `Bearer ${token}` },
+  // const fetchProduct = async () => {
+  
+  //   try {
+  //     const response = await axios.get("http://localhost:4000/api/v1/products/getdetailswishlist", {
+  //       headers: { Authorization: `Bearer ${token}` },
 
-      })
-      setwishListProduct(response.data.products)
+  //     })
+  //     setwishListProduct(response.data.products)
 
-      // console.log("wishlist response",response)
+  //     // console.log("wishlist response",response)
 
-    } catch (error) {
+  //   } catch (error) {
 
-    }
-  }
+  //   }
+  // }
   const calculateDiscount = (original, discounted) => {
     return Math.round(((original - discounted) / original) * 100);
   };
 
   const handleRemove = async(id) => {
+
+    dispatch(removeFromWishlist(id))
     
-    console.log('Removing item:', id);
-    try {
-      let response=await axios.post("http://localhost:4000/api/v1/products/removewishlist",{
-        productId:id
-      },
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    fetchProduct()
+  
+    // try {
+    //   let response=await axios.post("http://localhost:4000/api/v1/products/removewishlist",{
+    //     productId:id
+    //   },
+    // {
+    //   headers: { Authorization: `Bearer ${token}` },
+    // })
+    // // fetchProduct()
       
-    } catch (error) {
+    // } catch (error) {
       
-    }
+    // }
   };
 
   const handleBuyNow = (id) => {
@@ -62,13 +70,13 @@ const WishList = () => {
 
   useEffect(() => {
     if (token) {
-      fetchProduct()
+      // fetchProduct()
 
     }
   }, [token])
   console.log("wishlist response", wisListproduct)
 
-  if (!wisListproduct?.length) {
+  if (! wishlist?.length) {
     return (
       <div className="flex items-center justify-center h-64 mt-16">
         <p className="text-gray-500 text-lg">Your WishList is empty</p>
@@ -78,7 +86,7 @@ const WishList = () => {
   return (
 <div className="mt-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 gap-6">
-        {wisListproduct.map((item) => (
+        { wishlist.map((item) => (
           <div key={item._id} className="bg-white rounded-lg shadow-md p-6 transition-all hover:shadow-lg">
             <div className="flex flex-col md:flex-row items-start gap-6">
               {/* Image Container */}
