@@ -4,18 +4,39 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import RatingAndReview from './RatingAndReview';
 import toast from 'react-hot-toast';
+import { useDispatch, useSelector } from "react-redux";
 import copy from "copy-to-clipboard"
+import AddressPopup from '../Address/AddressPopup';
+import ConfirmationModal from '../../Component/Common/ConfirmationModal';
+import { getProductById } from '../../services/operations/singleproductApi';
+import { addTowishlist } from '../../slice/wishlistSlice';
 
 
 const SingleItem = () => {
     const { productId } = useParams();
-    const [product, setProduct] = useState(null);
+    
     const [mainImage, setMainImage] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [wisListId, setWisListId] = useState(null);
     const [isInWishlist, setIsInWishlist] = useState(false);
     const navigate = useNavigate()
+    const [isAddressPopupVisible, setIsAddressPopupVisible] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState(null);
+    const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
+    const [confirmationModal, setConfirmationModal] = useState(null)
+    const dispatch=useDispatch()
+    const { selectedProduct, loading } = useSelector((state) => state.singleproduct);
+   
+    // Function to handle modal open
+    const openConfirmationModal = () => {
+        setIsConfirmationModalVisible(true);
+    };
+
+    // Function to handle modal close
+    const closeConfirmationModal = () => {
+        setIsConfirmationModalVisible(false);
+    };
 
     let token;
     const storedTokenData = JSON.parse(localStorage.getItem("token"));
@@ -26,127 +47,39 @@ const SingleItem = () => {
         localStorage.removeItem("token");
         console.log("Token has expired");
     }
-    const fetchProductId = async () => {
-        try {
-            let response = await axios.get("http://localhost:4000/api/v1/products/wishlistid", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            console.log("wishlistid", response?.data)
-            // setWisListId()
-            setWisListId(response?.data?.items?.map(item => item.productId));
-
-        } catch (error) {
-
-        }
-    }
 
     useEffect(() => {
-        fetchProductId()
-    }, [])
-    console.log("wishlistid", wisListId)
-
-
-    const fetchProduct = async () => {
-        try {
-            let response = await axios.get(`http://localhost:4000/api/v1/products/getproductbyId/${productId}`);
-            const fetchedProduct = response?.data?.product;
-            setProduct(fetchedProduct);
-        } catch (error) {
-            console.error("Error fetching product", error);
-        }
-    };
+        dispatch(getProductById(productId));
+    }, [,dispatch,productId]);
 
     useEffect(() => {
-        fetchProduct();
-    }, [productId]);
-
-    useEffect(() => {
-        if (product) {
-            setMainImage(product?.images?.[0] || null);
-            setSelectedSize(product?.price_size?.[0] || null);
+        if (selectedProduct) {
+            setMainImage(selectedProduct?.images?.[0] || null);
+            setSelectedSize(selectedProduct?.price_size?.[0] || null);
         }
-    }, [product]);
-    const removeFromWishList=async(productId)=>{
-        try {
-            let response=await axios.delete("http://localhost:4000/api/v1/products/removewishlist",{
-                productId
-            },
-            {
-                headers: { Authorization: `Bearer ${token}` },
-              })
-            
-        } catch (error) {
-            
-        }
-
-    }
+    }, [selectedProduct]);
+   
 
     const handleShare = () => {
         copy(window.location.href)
         toast.success("Link copied to clipboard")
       }
 
-    const addtoWishList = async (productId) => {
-        
-        // const{
-
-
-        // }=product;
-
-        if (token) {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    // Do not set 'Content-Type' manually for FormData
-                },
-            };
-
-            console.log("Add to wish list token", token)
-
-
-            try {
-
-
-                let response = await axios.post("http://localhost:4000/api/v1/products/addwishlist", {
-                    productId
-                }, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}` // Ensure token is valid
-                    }
-
-                }
-
-                )
-
-                console.log("wisList Response:", response.data);
-                alert("Product added to WishList successfully!");
-            } catch (error) {
-                console.error("Error adding to wishList:", error.response?.data || error.message);
-                alert("Failed to add product to WishList.");
-            }
-        }
-
+    const addtoWishListt = async (productId) => {      
+    dispatch(addTowishlist(selectedProduct))
 
     }
 
     const addtocart = async (id) => {
+
+     if(token!=null){
         if (!selectedSize) {
             alert("Please select a size before adding to cart.");
             return;
         }
-
         let selectedsize = selectedSize.size;
         let selecetedDiscountedPrice = selectedSize.discountedPrice;
         let selectedPrice = selectedSize.price;
-        // const {
-        //     selectedSize,
-        //     selecetedDiscountedPrice,
-
-
-        // }=product
 
         try {
             const response = await axios.post(
@@ -175,6 +108,19 @@ const SingleItem = () => {
         }
 
         console.log("Add to Cart:", selectedsize, selectedPrice, selecetedDiscountedPrice, quantity);
+     }
+     else{
+        setConfirmationModal({
+            text1: "You are not logged in!",
+            text2: "Please login to Add the Product.",
+            btn1Text: "Login",
+            btn2Text: "Cancel",
+            btn1Handler: () => navigate("/login"),
+            btn2Handler: () => closeConfirmationModal(null),
+          })
+        openConfirmationModal()
+
+     }  
     };
 
 
@@ -184,7 +130,46 @@ const SingleItem = () => {
         }
     };
 
-    if (!product) return <div className="text-center text-xl mt-20">Loading...</div>;
+    const handleAddressSelect = (addressId) => {
+        setSelectedAddress(addressId);
+        // Proceed with the purchase logic here
+        console.log("Selected Address:", addressId);
+       toast.success("procedding for checkout")
+        navigate("/product/checkout"); // Navigate to the checkout page
+        
+    };
+
+    const handleBuyNow=async()=>{
+        if(!token){
+            setConfirmationModal({
+                text1: "You are not logged in!",
+                text2: "Please login to Buy the Product.",
+                btn1Text: "Login",
+                btn2Text: "Cancel",
+                btn1Handler: () => navigate("/login"),
+                btn2Handler: () => closeConfirmationModal(null),
+              })
+            openConfirmationModal()
+        }
+        else{
+            setIsAddressPopupVisible(true);
+            try {
+                let response = await axios.get("http://localhost:4000/api/v1/auth/getaddress", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    
+                });
+               
+                
+            } catch (error) {
+                
+            }
+        }
+
+    }
+
+    if (!selectedProduct) return <div className="text-center text-xl mt-20">Loading...</div>;
 
     return (
 
@@ -194,7 +179,7 @@ const SingleItem = () => {
             <div className="flex flex-col lg:flex-row gap-4">
                 {/* Thumbnail Gallery */}
                 <div className="flex lg:flex-col space-x-2 lg:space-y-2 overflow-x-auto lg:overflow-visible">
-                    {product.images?.map((image, index) => (
+                    {selectedProduct.images?.map((image, index) => (
                         <img
                             key={index}
                             src={image}
@@ -211,14 +196,14 @@ const SingleItem = () => {
                 <div className="flex-grow relative">
                     <img
                         src={mainImage || "fallback-image-url"}
-                        alt={product.name}
+                        alt={selectedProduct.name}
                         className="w-full h-[400px] lg:h-[500px] object-contain rounded-lg shadow-lg"
                     />
                     <div className="absolute top-4 right-4 flex space-x-2">
                         <button className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition" aria-label="Add to Wishlist">
                             <Heart size={24} className="text-gray-600 hover:text-red-500"
                                 onClick={() => {
-                                    addtoWishList(product._id)
+                                    addtoWishListt(selectedProduct._id)
                                 }}
                             />
                         </button>
@@ -230,7 +215,7 @@ const SingleItem = () => {
                     {/* Mobile Price Display */}
                     <div className="lg:hidden mt-4  rounded-lg shadow-sm">
                         <div className="grid grid-cols-2 gap-2 mb-4">
-                            {product.price_size?.map((sizeOption) => (
+                            {selectedProduct.price_size?.map((sizeOption) => (
                                 <div
                                     key={sizeOption._id}
                                     className={`border rounded-lg p-2 bg-white cursor-pointer transition 
@@ -286,10 +271,10 @@ const SingleItem = () => {
                             </div>
                         </div>
                         <div className="flex space-x-4 mt-4">
-                            <button className="flex-1 flex items-center justify-center bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition" onClick={() => addtocart(product._id)}>
+                            <button className="flex-1 flex items-center justify-center bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition" onClick={() => addtocart(selectedProduct._id)}>
                                 <ShoppingCart className="mr-2" /> Add to Cart
                             </button>
-                            <button className="flex-1 flex items-center justify-center bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition">
+                            <button className="flex-1 flex items-center justify-center bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition"  onClick={() => handleBuyNow()}>
                                 Buy Now
                             </button>
                         </div>
@@ -301,12 +286,12 @@ const SingleItem = () => {
 
             {/* Product Details */}
             <div>
-                <h1 className="text-2xl text-[#1b2c0a] font-bold mb-2">{product.name}</h1>
+                <h1 className="text-2xl text-[#1b2c0a] font-bold mb-2">{selectedProduct.name}</h1>
 
                 {/* Desktop Price Display */}
                 <div className="hidden lg:block  p-4 rounded-lg mb-4">
                     <div className="flex flex-wrap gap-4">
-                        {product.price_size?.map((sizeOption) => (
+                        {selectedProduct.price_size?.map((sizeOption) => (
                             <div
                                 key={sizeOption._id}
                                 className={`border rounded-lg p-3 bg-white cursor-pointer transition 
@@ -353,13 +338,23 @@ const SingleItem = () => {
                 {/* Description */}
                 <div>
                     <h3 className="text-lg font-semibold mb-2">Product Description</h3>
-                    <p className="text-gray-700">{product.description}</p>
+                    <p className="text-gray-700">{selectedProduct.description}</p>
                 </div>
             </div>
         </div>
         <div>
            <RatingAndReview productId={productId}/>
         </div>
+        <AddressPopup
+                isVisible={isAddressPopupVisible}
+                onClose={() => setIsAddressPopupVisible(false)}
+                onAddressSelect={handleAddressSelect}
+            />
+            {isConfirmationModalVisible && (
+                <ConfirmationModal
+               modalData={confirmationModal}
+            />
+            )}
         </>
     );
 };
