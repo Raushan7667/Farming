@@ -1,14 +1,70 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Camera, Trash2, Plus, X } from 'lucide-react';
 import axios from 'axios';
+import TextEditor from './TextEditor';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const AddProduct = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [fetchdata, setFetchedData] = useState([]);
   const [images, setImages] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [chips, setChips] = useState([]);
-  const fileInputRef = useRef();
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [productData, setProductData] = useState({
+    fullShopDetails: '',
+    name: '',
+    description: '',
+    priceDetails: [{ price: '', discountedPrice: '', size: '', quantity: '' }],
+    images: []
+  });
+
+  // Fetch product data if editing
+  useEffect(() => {
+    const fetchProductData = async () => {
+      if (id) {
+        try {
+          const storedTokenData = JSON.parse(localStorage.getItem("token"));
+          if (storedTokenData && Date.now() < storedTokenData.expires) {
+            const response = await axios.get(
+              `http://localhost:4000/api/v1/products/getproductbyid/${id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${storedTokenData.value}`
+                }
+              }
+            );
+            
+            const product = response.data.product;
+            setIsEditing(true);
+            
+            // Set form data
+            setProductData({
+              fullShopDetails: product.fullShopDetails || '',
+              name: product.name || '',
+              description: product.description || '',
+              priceDetails: product.price_size || [{ price: '', discountedPrice: '', size: '', quantity: '' }],
+              images: product.images || []
+            });
+            
+            // Set category and subcategory
+            setSelectedCategory(product.category?.parentCategory || '');
+            setSelectedSubcategory(product.category?._id || '');
+            
+            // Set tags
+            setChips(product.tag || []);
+          }
+        } catch (error) {
+          console.error('Error fetching product:', error);
+        }
+      }
+    };
+
+    fetchProductData();
+  }, [id]);
 
   const fetchCategory = async () => {
     try {
@@ -23,16 +79,6 @@ const AddProduct = () => {
   useEffect(() => {
     fetchCategory();
   }, []);
-
-  const [productData, setProductData] = useState({
-    fullShopDetails: '',
-    name: '',
-    description: '',
-    priceDetails: [{ price: '', discountedPrice: '', size: '', quantity: '' }],
-    images: []
-  });
-
-  const formData = new FormData();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -96,54 +142,52 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // Create a new FormData object
+    
     const formData = new FormData();
-  
-    // Append non-array fields
+    
     formData.append("name", productData.name);
     formData.append("description", productData.description);
-    formData.append("price_size", JSON.stringify(productData.priceDetails)); // Stringify price_size
+    formData.append("price_size", JSON.stringify(productData.priceDetails));
     formData.append("fullShopDetails", productData.fullShopDetails);
     formData.append("category", selectedSubcategory);
     formData.append("badges", "PreciAgri");
-  
-    // Append each chip individually
-    formData.append("tag", JSON.stringify(chips))
-  
-    // Append each image file
-    images.forEach((image, index) => {
-      formData.append(`image`, image); // Use `image` as the field name
-    });
-  
-    // Get the token from localStorage
-  let token;
-  const storedTokenData = JSON.parse(localStorage.getItem("token"));
-  if (storedTokenData && Date.now() < storedTokenData.expires) {
-    console.log("Token:", storedTokenData.value);
-    token=storedTokenData.value
-  } else {
-    localStorage.removeItem("token");
-    console.log("Token has expired");
-  }
+    formData.append("tag", JSON.stringify(chips));
+    
+    // Only append new images if they exist
+    if (images.length > 0) {
+      images.forEach((image) => {
+        formData.append(`image`, image);
+      });
+    }
+
+    let token;
+    const storedTokenData = JSON.parse(localStorage.getItem("token"));
+    if (storedTokenData && Date.now() < storedTokenData.expires) {
+      token = storedTokenData.value;
+    } else {
+      localStorage.removeItem("token");
+    }
+
     if (token) {
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
-          // Do not set 'Content-Type' manually for FormData
         },
       };
-  
+
       try {
-        // Send the request
-        let response = await axios.post(
-          "http://localhost:4000/api/v1/products/createproduct",
-          formData,
-          config
-        );
-        console.log('response in adding Product', response);
+        const url = isEditing 
+          ? `http://localhost:4000/api/v1/products/editproduct/${id}`
+          : "http://localhost:4000/api/v1/products/createproduct";
+        
+        const method = isEditing ? 'put' : 'post';
+        
+        await axios[method](url, formData, config);
+        
+        // Navigate back to seller dashboard after successful submission
+        navigate('/seller');
       } catch (error) {
-        console.error('Error adding product:', error);
+        console.error('Error saving product:', error);
       }
     }
   };
@@ -227,15 +271,24 @@ const AddProduct = () => {
       </div>
       <div className="mt-4">
         <label className="block mb-2">Description</label>
-        <textarea
-          name="description"
-          value={productData.description}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded"
-          required
+        {/* Replace textarea with TextEditor component */}
+        <TextEditor 
+          value={productData.description} 
+          onChange={handleInputChange} 
         />
       </div>
-      <div className="flex flex-col space-y-2">
+      
+      {/* Hidden field that shows the HTML content for debugging */}
+      <div className="mt-2 p-2 border rounded bg-gray-50">
+        <details>
+          <summary className="text-sm font-medium cursor-pointer">View HTML content (for debugging)</summary>
+          <pre className="text-xs mt-2 p-2 bg-gray-100 rounded overflow-x-auto">
+            {productData.description}
+          </pre>
+        </details>
+      </div>
+      
+      <div className="flex flex-col space-y-2 mt-4">
         <label className="block mb-2" htmlFor="chip">
           Enter the name of the chip
         </label>
@@ -363,7 +416,7 @@ const AddProduct = () => {
         type="submit"
         className="w-full mt-4 p-3 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
-        Add Product
+        {isEditing ? 'Update Product' : 'Add Product'}
       </button>
     </form>
   );
