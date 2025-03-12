@@ -10,6 +10,7 @@ const SellerRoutes = () => {
     <Routes>
     <Route path='/' element={<Seller/>}/>
     <Route path='/addproduct' element={<AddProduct/>}/>
+    <Route path="/edit-product/:id" element={<AddProduct />} />
     </Routes>
    </>
   )
