@@ -16,7 +16,7 @@ export const productEndpoint={
     UPDATE_PRODUCT_API: BASE_URL + "/product/update",
     GET_PRODUCT_BY_ID_API: BASE_URL + "/products/getproductbyId/",
     GET_PRODUCT_BY_CATEGORY_API: BASE_URL + "/products/category/",
-    GET_PRODUCT_BY_SELLER_API: BASE_URL + "/products/seller/",
+    GET_PRODUCT_LISTED_BY_SELLER_API: BASE_URL + "/products/sellerProductt/",
     GET_PRODUCT_BY_SEARCH_API: BASE_URL + "/products/search/",
     GET_PRODUCT_BY_FILTER_API: BASE_URL + "/products/filter/",
     GET_PRODUCT_BY_POPULAR_API: BASE_URL + "/products/popular",
