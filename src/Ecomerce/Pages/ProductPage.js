@@ -105,7 +105,7 @@ const ProductPage = () => {
               {/* Product Grid Section */}
               <div  className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-3 mb-2">
                 {filteredProducts.length > 0 ? (
-                  filteredProducts.map(prod => <ProductCard key={prod._id} product={prod} />)
+                  filteredProducts.map(prod => <ProductCard key={prod?._id} product={prod} />)
                 ) : (
                   <p className="col-span-full text-center text-gray-500">No products found</p>
                 )}
