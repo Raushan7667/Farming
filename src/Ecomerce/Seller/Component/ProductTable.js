@@ -49,7 +49,7 @@ const ProductTable = () => {
   const handleEditProduct = (id) => {
     navigate(`/seller/edit-product/${id}`);
   }
-
+console.log("seller product is",sellerProducts)
   return (
     <div className="w-full">
       {/* Loading State */}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Camera, Trash2, Plus, X } from 'lucide-react';
 import axios from 'axios';
 import TextEditor from './TextEditor';
@@ -22,7 +22,7 @@ const AddProduct = () => {
     images: []
   });
 
-  // Fetch product data if editing
+  // Fetch product data if editing (unchanged logic)
   useEffect(() => {
     const fetchProductData = async () => {
       if (id) {
@@ -31,30 +31,18 @@ const AddProduct = () => {
           if (storedTokenData && Date.now() < storedTokenData.expires) {
             const response = await axios.get(
               `http://localhost:4000/api/v1/products/getproductbyid/${id}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${storedTokenData.value}`
-                }
-              }
+              { headers: { Authorization: `Bearer ${storedTokenData.value}` } }
             );
-            
             const product = response.data.product;
             setIsEditing(true);
-            
-            // Set form data
             setProductData({
-              fullShopDetails: product.fullShopDetails || '',
+              fullShopDetails: product.sellers[0]?.fullShopDetails || '',
               name: product.name || '',
               description: product.description || '',
-              priceDetails: product.price_size || [{ price: '', discountedPrice: '', size: '', quantity: '' }],
+              priceDetails: product.sellers[0]?.price_size || [{ price: '', discountedPrice: '', size: '', quantity: '' }],
               images: product.images || []
             });
-            
-            // Set category and subcategory
-            setSelectedCategory(product.category?.parentCategory || '');
-            setSelectedSubcategory(product.category?._id || '');
-            
-            // Set tags
+            setSelectedCategory(product.category || '');
             setChips(product.tag || []);
           }
         } catch (error) {
@@ -62,49 +50,36 @@ const AddProduct = () => {
         }
       }
     };
-
     fetchProductData();
   }, [id]);
 
   const fetchCategory = async () => {
     try {
-      let response = await axios.get("http://localhost:4000/api/v1/products/getallparentcategory");
-      console.log("all category", response.data.data);
+      const response = await axios.get("http://localhost:4000/api/v1/products/getallparentcategory");
       setFetchedData(response.data.data);
     } catch (error) {
       alert(error.message);
     }
   };
 
-  useEffect(() => {
-    fetchCategory();
-  }, []);
+  useEffect(() => { fetchCategory(); }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProductData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setProductData(prev => ({ ...prev, [name]: value }));
   };
 
   const handlePriceDetailChange = (index, e) => {
     const { name, value } = e.target;
     const newPriceDetails = [...productData.priceDetails];
     newPriceDetails[index][name] = value;
-    setProductData(prev => ({
-      ...prev,
-      priceDetails: newPriceDetails
-    }));
+    setProductData(prev => ({ ...prev, priceDetails: newPriceDetails }));
   };
 
   const addPriceDetail = () => {
     setProductData(prev => ({
       ...prev,
-      priceDetails: [
-        ...prev.priceDetails,
-        { price: '', discountedPrice: '', size: '', quantity: '' }
-      ]
+      priceDetails: [...prev.priceDetails, { price: '', discountedPrice: '', size: '', quantity: '' }]
     }));
   };
 
@@ -117,18 +92,12 @@ const AddProduct = () => {
     const files = Array.from(e.target.files);
     setImages(prev => [...prev, ...files]);
     const imageUrls = files.map(file => URL.createObjectURL(file));
-    setProductData(prev => ({
-      ...prev,
-      images: [...prev.images, ...imageUrls]
-    }));
+    setProductData(prev => ({ ...prev, images: [...prev.images, ...imageUrls] }));
   };
 
   const removeImage = (index) => {
     setImages(prev => prev.filter((_, i) => i !== index));
-    setProductData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
+    setProductData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
   const handleCategoryChange = (categoryId) => {
@@ -142,49 +111,27 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     const formData = new FormData();
-    
     formData.append("name", productData.name);
     formData.append("description", productData.description);
     formData.append("price_size", JSON.stringify(productData.priceDetails));
     formData.append("fullShopDetails", productData.fullShopDetails);
-    formData.append("category", selectedSubcategory);
+    formData.append("category", selectedSubcategory || selectedCategory);
     formData.append("badges", "PreciAgri");
     formData.append("tag", JSON.stringify(chips));
-    
-    // Only append new images if they exist
     if (images.length > 0) {
-      images.forEach((image) => {
-        formData.append(`image`, image);
-      });
+      images.forEach((image) => formData.append(`image`, image));
     }
 
-    let token;
     const storedTokenData = JSON.parse(localStorage.getItem("token"));
     if (storedTokenData && Date.now() < storedTokenData.expires) {
-      token = storedTokenData.value;
-    } else {
-      localStorage.removeItem("token");
-    }
-
-    if (token) {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
+      const config = { headers: { Authorization: `Bearer ${storedTokenData.value}` } };
       try {
-        const url = isEditing 
+        const url = isEditing
           ? `http://localhost:4000/api/v1/products/editproduct/${id}`
           : "http://localhost:4000/api/v1/products/createproduct";
-        
         const method = isEditing ? 'put' : 'post';
-        
         await axios[method](url, formData, config);
-        
-        // Navigate back to seller dashboard after successful submission
         navigate('/seller');
       } catch (error) {
         console.error('Error saving product:', error);
@@ -193,176 +140,160 @@ const AddProduct = () => {
   };
 
   const handleDeleteChip = (chipIndex) => {
-    // Filter the chips array to remove the chip with the given index
-    const newChips = chips.filter((_, index) => index !== chipIndex)
-    setChips(newChips)
-  }
+    setChips(chips.filter((_, index) => index !== chipIndex));
+  };
+
   const handleKeyDown = (event) => {
-    // Check if user presses "Enter" or ","
     if (event.key === "Enter" || event.key === ",") {
-      // Prevent the default behavior of the event
-      event.preventDefault()
-      // Get the input value and remove any leading/trailing spaces
-      const chipValue = event.target.value.trim()
-      // Check if the input value exists and is not already in the chips array
+      event.preventDefault();
+      const chipValue = event.target.value.trim();
       if (chipValue && !chips.includes(chipValue)) {
-        // Add the chip to the array and clear the input
-        const newChips = [...chips, chipValue]
-        setChips(newChips)
-        event.target.value = ""
+        setChips([...chips, chipValue]);
+        event.target.value = "";
       }
     }
-  }
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-7xl mx-auto p-6 bg-white shadow-md rounded">
-      <div className="grid grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="max-w-7xl mx-auto p-8 bg-white rounded-xl shadow-lg">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">
+        {isEditing ? 'Edit Product' : 'Add New Product'}
+      </h2>
+
+      {/* Grid Layout for Shop Details and Name */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div>
-          <label className="block mb-2">Full Shop Details</label>
+          <label className="block mb-1 font-medium text-gray-700">Full Shop Details</label>
           <input
             type="text"
             name="fullShopDetails"
             value={productData.fullShopDetails}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             required
           />
         </div>
         <div>
-          <label className="block mb-2">Product Name</label>
+          <label className="block mb-1 font-medium text-gray-700">Product Name</label>
           <input
             type="text"
             name="name"
             value={productData.name}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             required
           />
         </div>
       </div>
-      <label className="block mb-1 mt-2">Category</label>
-      <div className="mt-4 flex gap-2">
-        <select
-          value={selectedCategory}
-          onChange={(e) => handleCategoryChange(e.target.value)}
-          className="w-full p-2 border rounded"
-        >
-          <option value="">Select Category</option>
-          {fetchdata.map((category) => (
-            <option key={category._id} value={category._id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-        <select
-          value={selectedSubcategory}
-          onChange={(e) => handleSubcategoryChange(e.target.value)}
-          className="w-full p-2 border rounded"
-          disabled={!selectedCategory}
-        >
-          <option value="">Select Subcategory</option>
-          {selectedCategory &&
-            fetchdata.find(cat => cat._id === selectedCategory)?.subcategories.map((subcategory) => (
-              <option key={subcategory._id} value={subcategory._id}>
-                {subcategory.name}
-              </option>
+
+      {/* Category Selection */}
+      <div className="mb-6">
+        <label className="block mb-1 font-medium text-gray-700">Category</label>
+        <div className="flex gap-4">
+          <select
+            value={selectedCategory}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+            <option value="">Select Category</option>
+            {fetchdata.map((category) => (
+              <option key={category._id} value={category._id}>{category.name}</option>
             ))}
-        </select>
+          </select>
+          <select
+            value={selectedSubcategory}
+            onChange={(e) => handleSubcategoryChange(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            disabled={!selectedCategory}
+          >
+            <option value="">Select Subcategory</option>
+            {selectedCategory &&
+              fetchdata.find(cat => cat._id === selectedCategory)?.subcategories.map((subcategory) => (
+                <option key={subcategory._id} value={subcategory._id}>{subcategory.name}</option>
+              ))}
+          </select>
+        </div>
       </div>
-      <div className="mt-4">
-        <label className="block mb-2">Description</label>
-        {/* Replace textarea with TextEditor component */}
-        <TextEditor 
-          value={productData.description} 
-          onChange={handleInputChange} 
-        />
+
+      {/* Description */}
+      <div className="mb-6">
+        <label className="block mb-1 font-medium text-gray-700">Description</label>
+        <TextEditor value={productData.description} onChange={handleInputChange} />
       </div>
-      
-      {/* Hidden field that shows the HTML content for debugging */}
-      <div className="mt-2 p-2 border rounded bg-gray-50">
-        <details>
-          <summary className="text-sm font-medium cursor-pointer">View HTML content (for debugging)</summary>
-          <pre className="text-xs mt-2 p-2 bg-gray-100 rounded overflow-x-auto">
-            {productData.description}
-          </pre>
-        </details>
-      </div>
-      
-      <div className="flex flex-col space-y-2 mt-4">
-        <label className="block mb-2" htmlFor="chip">
-          Enter the name of the chip
-        </label>
-        <div className="flex w-full flex-wrap gap-y-2">
+
+      {/* Tags */}
+      <div className="mb-6">
+        <label className="block mb-1 font-medium text-gray-700">Tags</label>
+        <div className="flex flex-wrap gap-2 mb-2">
           {chips.map((chip, index) => (
-            <div
+            <span
               key={index}
-              className="m-1 flex items-center rounded-full bg-green-400 px-2 py-1 text-sm text-richblack-5"
+              className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
             >
               {chip}
               <button
                 type="button"
-                className="ml-2 focus:outline-none"
                 onClick={() => handleDeleteChip(index)}
+                className="ml-2 text-blue-600 hover:text-blue-800"
               >
-                <X />
+                <X size={16} />
               </button>
-            </div>
+            </span>
           ))}
-          <input
-            name="chip"
-            type="text"
-            placeholder="Enter tag"
-            onKeyDown={handleKeyDown}
-            className="w-full p-2 border rounded"
-          />
         </div>
+        <input
+          type="text"
+          placeholder="Add a tag (press Enter or comma)"
+          onKeyDown={handleKeyDown}
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        />
       </div>
-      <div className="mt-4">
-        <label className="block mb-2">Product Images</label>
-        <div className="flex flex-wrap gap-2 mt-2 mb-2">
+
+      {/* Images */}
+      <div className="mb-6">
+        <label className="block mb-1 font-medium text-gray-700">Product Images</label>
+        <div className="flex flex-wrap gap-4 mb-4">
           {productData.images.map((image, index) => (
-            <div key={index} className="relative">
+            <div key={index} className="relative group">
               <img
                 src={image}
                 alt="Product"
-                className="w-24 h-24 object-cover rounded"
+                className="w-32 h-32 object-cover rounded-lg shadow-md"
               />
               <button
                 type="button"
                 onClick={() => removeImage(index)}
-                className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <Trash2 size={16} />
               </button>
             </div>
           ))}
         </div>
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="hidden"
-          id="image-upload"
-        />
-        <label
-          htmlFor="image-upload"
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
-        >
+        <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
           <Camera size={20} /> Upload Images
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
         </label>
       </div>
-      <div className="mt-4">
-        <label className="block mb-2">Price & Sizes</label>
+
+      {/* Price & Sizes */}
+      <div className="mb-6">
+        <label className="block mb-1 font-medium text-gray-700">Price & Sizes</label>
         {productData.priceDetails.map((detail, index) => (
-          <div key={index} className="grid grid-cols-4 gap-2 mb-2">
+          <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
             <input
               type="number"
               name="price"
               placeholder="Price"
               value={detail.price}
               onChange={(e) => handlePriceDetailChange(index, e)}
-              className="p-2 border rounded"
+              className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               required
             />
             <input
@@ -371,7 +302,7 @@ const AddProduct = () => {
               placeholder="Discounted Price"
               value={detail.discountedPrice}
               onChange={(e) => handlePriceDetailChange(index, e)}
-              className="p-2 border rounded"
+              className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             <input
               type="text"
@@ -379,24 +310,24 @@ const AddProduct = () => {
               placeholder="Size"
               value={detail.size}
               onChange={(e) => handlePriceDetailChange(index, e)}
-              className="p-2 border rounded"
+              className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
               required
             />
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <input
                 type="number"
                 name="quantity"
                 placeholder="Quantity"
                 value={detail.quantity}
                 onChange={(e) => handlePriceDetailChange(index, e)}
-                className="p-2 border rounded flex-grow"
+                className="p-3 border border-gray-300 rounded-lg flex-grow focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 required
               />
               {index > 0 && (
                 <button
                   type="button"
                   onClick={() => removePriceDetail(index)}
-                  className="ml-2 text-red-500"
+                  className="text-red-500 hover:text-red-700"
                 >
                   <Trash2 size={20} />
                 </button>
@@ -407,14 +338,16 @@ const AddProduct = () => {
         <button
           type="button"
           onClick={addPriceDetail}
-          className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded mt-2"
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
         >
           <Plus size={20} /> Add Price/Size
         </button>
       </div>
+
+      {/* Submit Button */}
       <button
         type="submit"
-        className="w-full mt-4 p-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+        className="w-full p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
       >
         {isEditing ? 'Update Product' : 'Add Product'}
       </button>
