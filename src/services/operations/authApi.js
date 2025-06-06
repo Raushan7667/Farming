@@ -4,6 +4,7 @@ import {resetCart} from '../../slice/cartSlice'
 import {setUser} from '../../slice/profileSlice'
 import {apiConnector} from '../apiConnector'
 import { endpoints } from "../api"
+import { resetWishlist } from "../../slice/wishlistSlice"
 
 const {
     SENDOTP_API, 
@@ -149,6 +150,7 @@ const {
       dispatch(setToken(null))
       dispatch(setUser(null))
       dispatch(resetCart())
+      dispatch(resetWishlist())
       localStorage.removeItem("token")
       localStorage.removeItem("user")
       toast.success("Logged Out")
