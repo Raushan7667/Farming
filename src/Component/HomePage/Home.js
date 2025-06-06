@@ -4,6 +4,7 @@ import HeroSection from './HeroSection';
 import Service from './Service';
 import Technique from './Technique';
 import NavBar from '../Common/NavBar';
+import video from '../../Data/Logo/Video Banner.mp4';
 
 const Home = () => {
 
@@ -37,7 +38,7 @@ const Home = () => {
     
       <div className="relative w-full h-[70vh] overflow-hidden mt-16">
         <video
-          src="/Assets/Video/Video Banner.mp4"
+          src={video}
           autoPlay
           loop
           muted
