@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import ProfileLayout from './Profile'
 import axios from 'axios';
-import { X } from 'lucide-react';
+import { X, MoreVertical, Edit2, Trash2 } from 'lucide-react';
 
 const Address = () => {
     const [addresses, setAddresses] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingAddressId, setEditingAddressId] = useState(null);
+    const [activeDropdown, setActiveDropdown] = useState(null);
     const [formData, setFormData] = useState({
         Name: '',
         streetAddress: '',
@@ -66,6 +69,38 @@ const Address = () => {
         return "";
     };
 
+    const handleEditClick = (address) => {
+        setFormData({
+            Name: address.Name,
+            streetAddress: address.streetAddress,
+            city: address.city,
+            state: address.state,
+            zipCode: address.zipCode,
+            mobile: address.mobile
+        });
+        setIsEditing(true);
+        setEditingAddressId(address._id);
+        setShowModal(true);
+        setActiveDropdown(null);
+    };
+
+    const handleDeleteClick = async (addressId) => {
+        if (window.confirm('Are you sure you want to delete this address?')) {
+            try {
+                await axios.delete(`http://localhost:4000/api/v1/auth/deleteaddress/${addressId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                fetchAddresses();
+            } catch (error) {
+                console.error("Error deleting address:", error);
+                setError("Failed to delete address");
+            }
+        }
+        setActiveDropdown(null);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const validationError = validateForm();
@@ -78,18 +113,30 @@ const Address = () => {
         setError('');
 
         try {
-            await axios.post(
-                "http://localhost:4000/api/v1/auth/addaddress",
-                formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            if (isEditing) {
+                await axios.put(
+                    `http://localhost:4000/api/v1/auth/updateaddress/${editingAddressId}`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+            } else {
+                await axios.post(
+                    "http://localhost:4000/api/v1/auth/addaddress",
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+            }
 
             // Reset form and close modal
-            setFormData({
+            setFormData({ 
                 Name: '',
                 streetAddress: '',
                 city: '',
@@ -98,15 +145,31 @@ const Address = () => {
                 mobile: ''
             });
             setShowModal(false);
+            setIsEditing(false);
+            setEditingAddressId(null);
             
             // Refresh addresses list
             fetchAddresses();
         } catch (error) {
-            setError(error.response?.data?.message || "Error adding address");
+            setError(error.response?.data?.message || "Error saving address");
         } finally {
             setLoading(false);
         }
     };
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (activeDropdown && !event.target.closest('.dropdown-container')) {
+                setActiveDropdown(null);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [activeDropdown]);
 
     return (
         <ProfileLayout>
@@ -114,7 +177,19 @@ const Address = () => {
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold">My Addresses</h2>
                     <button
-                        onClick={() => setShowModal(true)}
+                        onClick={() => {
+                            setIsEditing(false);
+                            setEditingAddressId(null);
+                            setFormData({
+                                Name: '',
+                                streetAddress: '',
+                                city: '',
+                                state: '',
+                                zipCode: '',
+                                mobile: ''
+                            });
+                            setShowModal(true);
+                        }}
                         className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
                     >
                         Add New Address
@@ -126,8 +201,41 @@ const Address = () => {
                     {addresses.map((address) => (
                         <div
                             key={address._id}
-                            className="p-4 border rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow"
+                            className="p-4 border rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow relative"
                         >
+                            <div className="dropdown-container absolute top-4 right-4">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveDropdown(activeDropdown === address._id ? null : address._id);
+                                    }}
+                                    className="p-1 hover:bg-gray-100 rounded-full"
+                                >
+                                    <MoreVertical size={20} className="text-gray-500" />
+                                </button>
+                                
+                                {activeDropdown === address._id && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
+                                        <div className="py-1">
+                                            <button
+                                                onClick={() => handleEditClick(address)}
+                                                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+                                            >
+                                                <Edit2 size={16} className="mr-2" />
+                                                Edit Address
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteClick(address._id)}
+                                                className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full"
+                                            >
+                                                <Trash2 size={16} className="mr-2" />
+                                                Delete Address
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            
                             <p className="font-semibold text-lg">{address.Name}</p>
                             <p className="text-gray-600 mt-2">{address.streetAddress}</p>
                             <p className="text-gray-600">{`${address.city}, ${address.state}, ${address.zipCode}`}</p>
@@ -142,12 +250,14 @@ const Address = () => {
                     </div>
                 )}
 
-                {/* Add Address Modal */}
+                {/* Add/Edit Address Modal */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                         <div className="bg-white rounded-lg w-full max-w-md">
                             <div className="flex justify-between items-center p-4 border-b">
-                                <h3 className="text-xl font-semibold">Add New Address</h3>
+                                <h3 className="text-xl font-semibold">
+                                    {isEditing ? 'Edit Address' : 'Add New Address'}
+                                </h3>
                                 <button
                                     onClick={() => setShowModal(false)}
                                     className="text-gray-500 hover:text-gray-700"
@@ -266,7 +376,7 @@ const Address = () => {
                                         disabled={loading}
                                         className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
-                                        {loading ? 'Adding...' : 'Add Address'}
+                                        {loading ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Address' : 'Add Address')}
                                     </button>
                                 </div>
                             </form>

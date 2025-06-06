@@ -20,7 +20,7 @@ const Order = () => {
       }
 
       const response = await axios.get(
-        'http://localhost:4000/api/v1/orders/orderhistory',
+        'http://localhost:4000/api/v1/order/orderhistory',
         {
           headers: {
             Authorization: `Bearer ${storedTokenData.value}`
