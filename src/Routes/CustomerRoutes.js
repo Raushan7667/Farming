@@ -26,6 +26,10 @@ import Address from '../Ecomerce/Profile/Address'
 import Order from '../Ecomerce/Profile/Order'
 
 import CheckoutProduct from '../Ecomerce/Checkout/CheckoutProduct'
+import Server from '../Server/Server'
+import PaymentCallback from '../Ecomerce/Payment/PaymentCallback'
+import SingleNews from '../Component/HomePage/SingleNews'
+import SingleScheme from '../Component/HomePage/SingleScheme'
 
 
 const CustomerRoutes = () => {
@@ -39,6 +43,8 @@ const CustomerRoutes = () => {
         <Route path='/login' element={<Login />} />
         <Route path='/forgot-password' element={<ForgetPassword />} />
         <Route path='/news' element={<News />} />
+        <Route path='/news/:id' element={<SingleNews/>} />
+        <Route path='/scheme/:id' element={<SingleScheme />} />
         <Route path='/about' element={<AboutUs />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/verifyemail' element={<VerifyEmail />} />
@@ -54,6 +60,9 @@ const CustomerRoutes = () => {
         <Route path="/product/profile/addresses" element={<Address/>} />
         <Route path="/product/profile/orders" element={<Order/>} />
         <Route path="/product/checkout" element={<CheckoutProduct/>} />
+        <Route path="/server" element={<Server/>} />
+        <Route path="/payment/callback" element={<PaymentCallback/>} />
+
       </Routes>
       <Footer/>
     </>
