@@ -7,9 +7,12 @@ const ProductCard = ({ product }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
 
+  const primarySeller = product?.sellers?.[0];
+  const priceDetails = primarySeller?.price_size?.[0];
+
   const calculateDiscount = () => {
-    const originalPrice = product.price_size[0].price;
-    const discountedPrice = product.price_size[0].discountedPrice;
+    const originalPrice = priceDetails?.price;
+    const discountedPrice = priceDetails?.discountedPrice;
     return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
   };
 
@@ -58,12 +61,21 @@ const ProductCard = ({ product }) => {
         <h3 className="text-sm sm:text-lg text-[#28410d] mb-1 truncate font-bold hover:underline">
           {product.name}
         </h3>
-        <div className="flex flex-wrap items-center gap-2 mb-2 text-sm sm:text-base">
-          <span className="font-bold text-[#3a5e14]">Rs. {product.price_size[0].discountedPrice}</span>
-          <span className="text-[#28410d] line-through opacity-40">Rs. {product.price_size[0].price}</span>
-          {/* <span className="font-bold text-green-500">{calculateDiscount()}% off</span> */}
-          <span className="text-xs text-[#28410d]">({product.price_size[0].size})</span>
-        </div>
+        {priceDetails ? (
+          <div className="flex flex-wrap items-center gap-2 mb-2 text-sm sm:text-base">
+            <span className="font-bold text-[#3a5e14]">
+              Rs. {priceDetails.discountedPrice}
+            </span>
+            <span className="text-[#28410d] line-through opacity-40">
+              Rs. {priceDetails.price}
+            </span>
+            {/* Uncomment if needed */}
+            {/* <span className="font-bold text-green-500">{calculateDiscount()}% off</span> */}
+            <span className="text-xs text-[#28410d]">({priceDetails.size})</span>
+          </div>
+        ) : (
+          <div className="text-sm text-red-500">No price available</div>
+        )}
       </div>
     </div>
   );
