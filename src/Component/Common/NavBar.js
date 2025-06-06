@@ -18,9 +18,12 @@ const NavBar = () => {
   // Redux state
   const wishlistCount = useSelector((state) => state.wishlist.totalItems);
   const user = useSelector((state) => state.profile.user);
-
+  console.log("user in navbar", user);
   // Handle token expiration and fetch user details
-  useEffect(() => {
+  useEffect(() => { 
+    // localStorage.removeItem("wishlist");
+    // localStorage.removeItem("total");
+    // localStorage.removeItem("totalItems");
     const storedTokenData = JSON.parse(localStorage.getItem("token"));
     if (storedTokenData && Date.now() < storedTokenData.expires) {
       setToken(storedTokenData.value);
@@ -68,6 +71,12 @@ const NavBar = () => {
   const goToCart = () => navigate("/product/cart");
   const goToProfile = () => navigate("/product/profile");
   const goToWishList = () => navigate("/product/wishlist");
+
+  // Add this CSS class to handle overflow
+  const navBarStyles = {
+    overflowX: 'auto',
+    whiteSpace: 'nowrap',
+  };
 
   return (
     <>
